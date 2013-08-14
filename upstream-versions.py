@@ -18,7 +18,8 @@ class Exit():
     pass
 
 def ERR(msg):
-    sys.stderr.write("Error: %s\n", msg)
+    if msg:
+        sys.stderr.write("Error: %s\n", msg)
     sys.exit(1)
 
 def readurl(url):
@@ -28,21 +29,16 @@ def readurl(url):
         fin.close()
         return content
     except urllib2.HTTPError:
-        ERR("Service unavailable for %s" %(url))
-        return None
+        raise Exit("Service unavailable for %s" %(url))
     except urllib2.URLError:
-        ERR("Max allowed clients? for %s" %(url))
-        return None
+        raise Exit("Max allowed clients? for %s" %(url))
     except:
-        raise
-        return None
+        raise Exit()
 
 def parse_xorg_top():
     '''Returns an array'''
     url = "http://xorg.freedesktop.org/releases/individual"
     page = readurl(url)
-    if not page:
-        raise Exit()
 
     re_page = re.compile('<a href="(\w+)/"', re.IGNORECASE)
     packages = {}
@@ -63,8 +59,6 @@ def parse_xorg_page(url, category=None):
     vcs_base = 'http://cgit.freedesktop.org/xorg'
 
     page = readurl(url)
-    if not page:
-        raise Exit()
 
     packages = {}
     re_pkg = re.compile(package_pattern)
@@ -101,8 +95,6 @@ def parse_xterm_page(category=None):
     vcs_base = None
 
     page = readurl(url)
-    if not page:
-        raise Exit()
 
     packages = {}
     re_pkg = re.compile(package_pattern)
