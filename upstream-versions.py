@@ -121,10 +121,41 @@ def parse_xterm_page(category=None):
 
     return packages
 
+def parse_wayland_page(category=None):
+    url = 'http://wayland.freedesktop.org/releases/'
+    package_pattern = '(\w+)-([\.\d]+)\.(tar\.xz).*align="right">(\d+-\w+-\d+) (\d+:\d+)'
+    page = readurl(url)
+
+    packages = {}
+    re_pkg = re.compile(package_pattern)
+    for line in page.split("\n"):
+        m = re_pkg.search(line)
+        if not m:
+            continue
+        name = m.group(1)
+        version = m.group(2)
+        filename = "%s-%s.%s" %(m.group(1), m.group(2), m.group(3))
+        last_modified_date = m.group(4)
+        pkg = {
+            'name': name,
+            'version': version,
+            'released': last_modified_date,
+            'category': category,
+            'url': os.path.join(url, filename),
+            'vcs': None,
+            }
+
+        if name not in packages:
+            packages[name] = []
+        packages[name].append(pkg)
+
+    return packages
+
 
 if __name__ == "__main__":
     try:
-        data = parse_xorg_top()
+        data = parse_wayland_page()
+        #data = parse_xorg_top()
         #data.update(parse_xterm_page())
     except:
         sys.exit(1)
@@ -132,5 +163,3 @@ if __name__ == "__main__":
     data['_header'] = {
         }
     print json.dumps(data, indent=4)
-
-
