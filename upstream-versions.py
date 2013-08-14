@@ -47,11 +47,9 @@ def readurl(url):
 def parse_xorg_top():
     '''Returns an array'''
     url = "http://xorg.freedesktop.org/releases/individual"
-    page = readurl(url)
-
     re_page = re.compile('<a href="(\w+)/"', re.IGNORECASE)
     packages = {}
-    for line in page.split("\n"):
+    for line in readurl(url).split("\n"):
         m = re_page.search(line)
         if not m:
             continue
@@ -66,12 +64,9 @@ def parse_xorg_page(url, category=None):
     '''Returns a dict of packages parsed from the given url'''
     package_pattern = '<a href="([\w-]+)-([\d\.]+)\.(tar\.\w+)">[^<]+</a></td><td align="right">([\w-]+) .*</td>'
     vcs_base = 'http://cgit.freedesktop.org/xorg'
-
-    page = readurl(url)
-
     packages = {}
     re_pkg = re.compile(package_pattern)
-    for line in page.split("\n"):
+    for line in readurl(url).split("\n"):
         m = re_pkg.search(line)
         if not m:
             continue
@@ -96,11 +91,9 @@ def parse_xterm_page(category=None):
     url = 'ftp://invisible-island.net/xterm/'
     package_pattern = '\d+ (\w+ +\d+ +[\d:]+) (xterm)-(\d+)\.(tgz)'
     vcs_base = None
-    page = readurl(url)
-
     packages = {}
     re_pkg = re.compile(package_pattern)
-    for line in page.split("\n"):
+    for line in readurl(url).split("\n"):
         m = re_pkg.search(line)
         if not m:
             continue
@@ -117,11 +110,9 @@ def parse_xterm_page(category=None):
 def parse_wayland_page(category=None):
     url = 'http://wayland.freedesktop.org/releases/'
     package_pattern = '(\w+)-([\.\d]+)\.(tar\.xz).*align="right">(\d+-\w+-\d+) (\d+:\d+)'
-    page = readurl(url)
-
     packages = {}
     re_pkg = re.compile(package_pattern)
-    for line in page.split("\n"):
+    for line in readurl(url).split("\n"):
         m = re_pkg.search(line)
         if not m:
             continue
