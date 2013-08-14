@@ -82,10 +82,7 @@ def parse_xorg_page(url, category=None):
         # Special case to handle naming irregularities
         if name == 'xtrans':
             pkg['vcs'] = '%s/%s/%s' %(vcs_base, category, 'libxtrans')
-
-        if name not in packages:
-            packages[name] = []
-        packages[name].append(pkg)
+        packages.setdefault(name, []).append(pkg)
 
     return packages
 
@@ -114,10 +111,7 @@ def parse_xterm_page(category=None):
             'url': os.path.join(url, filename),
             'vcs': None,
             }
-
-        if name not in packages:
-            packages[name] = []
-        packages[name].append(pkg)
+        packages.setdefault(name, []).append(pkg)
 
     return packages
 
@@ -144,10 +138,7 @@ def parse_wayland_page(category=None):
             'url': os.path.join(url, filename),
             'vcs': None,
             }
-
-        if name not in packages:
-            packages[name] = []
-        packages[name].append(pkg)
+        packages.setdefault(name, []).append(pkg)
 
     return packages
 
@@ -155,8 +146,8 @@ def parse_wayland_page(category=None):
 if __name__ == "__main__":
     try:
         data = parse_wayland_page()
-        #data = parse_xorg_top()
-        #data.update(parse_xterm_page())
+        data = parse_xorg_top()
+        data.update(parse_xterm_page())
     except:
         sys.exit(1)
 
