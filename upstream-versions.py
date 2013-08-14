@@ -106,6 +106,27 @@ def parse_xterm_page(category=None):
 
     return packages
 
+def parse_mesa_page(category=None):
+    url = 'ftp://ftp.freedesktop.org/pub/mesa/'
+    #drwxrwxr-x    2 3043     800          4096 Feb 09  2012 8.0
+    package_pattern = '\d+ (\w+ +\d+ +[\d:]+) ([\d\.]+)\s*$'
+    packages = {}
+    re_pkg = re.compile(package_pattern)
+    for line in readurl(url).split("\n"):
+        print line
+        m = re_pkg.search(line)
+        if not m:
+            continue
+        filename = "%s-%s.%s" %('MesaLib', m.group(2), 'tar.bz2')
+
+        p = Package('mesa')
+        p.version = m.group(2)
+        p.released = m.group(1)
+        p.url = os.path.join(url, p.version, filename)
+        packages.setdefault(p.name, []).append(p.__dict__)
+
+    return packages
+
 def parse_wayland_page(category='wayland'):
     url = 'http://wayland.freedesktop.org/releases/'
     package_pattern = '(\w+)-([\.\d]+)\.(tar\.xz).*align="right">(\d+-\w+-\d+) (\d+:\d+)'
@@ -148,10 +169,11 @@ def parse_cairo_page(category='library'):
 if __name__ == "__main__":
     try:
         data = {}
-        data.update(parse_xorg_top())
-        data.update(parse_xterm_page())
-        data.update(parse_wayland_page())
-        data.update(parse_cairo_page())
+        #data.update(parse_xorg_top())
+        #data.update(parse_xterm_page())
+        #data.update(parse_wayland_page())
+        #data.update(parse_cairo_page())
+        data.update(parse_mesa_page())
     except:
         raise
 
