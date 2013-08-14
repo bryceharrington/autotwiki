@@ -10,6 +10,15 @@ import urllib2
 
 # TODO: Use beautifulsoup instead of manually parsing the page
 
+class Package(object):
+    def __init__(self, name):
+        self.name = name
+        self.version = None
+        self.released = None
+        self.category = None
+        self.url = None
+        self.vcs = None
+
 class Exit():
     """
     If an error message has already been displayed and we want to just exit the app, this
@@ -66,23 +75,20 @@ def parse_xorg_page(url, category=None):
         m = re_pkg.search(line)
         if not m:
             continue
-        name = m.group(1)
-        version = m.group(2)
         filename = "%s-%s.%s" %(m.group(1), m.group(2), m.group(3))
-        last_modified_date = m.group(4)
-        pkg = {
-            'name': name,
-            'version': version,
-            'released': last_modified_date, # Assume last modified == release date
-            'category': category,
-            'url': os.path.join(url, filename),
-            'vcs': '%s/%s/%s' %(vcs_base, category, name)
-            }
+
+        p = Package(m.group(1))
+        p.category = category
+        p.version = m.group(2)
+        p.released = m.group(4)
+        p.url = os.path.join(url, filename)
+        p.vcs = '%s/%s/%s' %(vcs_base, category, p.name)
 
         # Special case to handle naming irregularities
-        if name == 'xtrans':
-            pkg['vcs'] = '%s/%s/%s' %(vcs_base, category, 'libxtrans')
-        packages.setdefault(name, []).append(pkg)
+        if p.name == 'xtrans':
+            p.vcs = '%s/%s/%s' %(vcs_base, category, 'libxtrans')
+
+        packages.setdefault(p.name, []).append(p.__dict__)
 
     return packages
 
@@ -90,7 +96,6 @@ def parse_xterm_page(category=None):
     url = 'ftp://invisible-island.net/xterm/'
     package_pattern = '\d+ (\w+ +\d+ +[\d:]+) (xterm)-(\d+)\.(tgz)'
     vcs_base = None
-
     page = readurl(url)
 
     packages = {}
@@ -99,19 +104,13 @@ def parse_xterm_page(category=None):
         m = re_pkg.search(line)
         if not m:
             continue
-        name = m.group(2)
-        version = m.group(3)
         filename = "%s-%s.%s" %(m.group(2), m.group(3), m.group(4))
-        last_modified_date = m.group(1)
-        pkg = {
-            'name': name,
-            'version': m.group(3),
-            'released': last_modified_date,
-            'category': category,
-            'url': os.path.join(url, filename),
-            'vcs': None,
-            }
-        packages.setdefault(name, []).append(pkg)
+
+        p = Package(m.group(2))
+        p.version = m.group(3)
+        p.released = m.group(1)
+        p.url = os.path.join(url, filename)
+        packages.setdefault(p.name, []).append(p.__dict__)
 
     return packages
 
@@ -126,30 +125,24 @@ def parse_wayland_page(category=None):
         m = re_pkg.search(line)
         if not m:
             continue
-        name = m.group(1)
-        version = m.group(2)
         filename = "%s-%s.%s" %(m.group(1), m.group(2), m.group(3))
-        last_modified_date = m.group(4)
-        pkg = {
-            'name': name,
-            'version': version,
-            'released': last_modified_date,
-            'category': category,
-            'url': os.path.join(url, filename),
-            'vcs': None,
-            }
-        packages.setdefault(name, []).append(pkg)
+
+        p = Package(m.group(1))
+        p.version = m.group(2)
+        p.released = m.group(4)
+        p.url = os.path.join(url, filename)
+        packages.setdefault(p.name, []).append(p.__dict__)
 
     return packages
 
 
 if __name__ == "__main__":
     try:
-        data = parse_wayland_page()
         data = parse_xorg_top()
         data.update(parse_xterm_page())
+        data.update(parse_wayland_page())
     except:
-        sys.exit(1)
+        raise
 
     data['_header'] = {
         }
