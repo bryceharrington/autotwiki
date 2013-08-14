@@ -87,7 +87,7 @@ def parse_xorg_page(url, category=None):
 
     return packages
 
-def parse_xterm_page(category=None):
+def parse_xterm_page(category='app'):
     url = 'ftp://invisible-island.net/xterm/'
     package_pattern = '\d+ (\w+ +\d+ +[\d:]+) (xterm)-(\d+)\.(tgz)'
     packages = {}
@@ -99,6 +99,7 @@ def parse_xterm_page(category=None):
         filename = "%s-%s.%s" %(m.group(2), m.group(3), m.group(4))
 
         p = Package(m.group(2))
+        p.category = category
         p.version = m.group(3)
         p.released = m.group(1)
         p.url = os.path.join(url, filename)
@@ -106,9 +107,8 @@ def parse_xterm_page(category=None):
 
     return packages
 
-def parse_mesa_page(category=None):
+def parse_mesa_page(category='library'):
     url = 'ftp://ftp.freedesktop.org/pub/mesa/'
-    #drwxrwxr-x    2 3043     800          4096 Feb 09  2012 8.0
     package_pattern = '\d+ (\w+ +\d+ +[\d:]+) ([\d\.]+)\s*$'
     packages = {}
     re_pkg = re.compile(package_pattern)
@@ -120,6 +120,7 @@ def parse_mesa_page(category=None):
         filename = "%s-%s.%s" %('MesaLib', m.group(2), 'tar.bz2')
 
         p = Package('mesa')
+        p.category = category
         p.version = m.group(2)
         p.released = m.group(1)
         p.url = os.path.join(url, p.version, filename)
@@ -139,6 +140,7 @@ def parse_wayland_page(category='wayland'):
         filename = "%s-%s.%s" %(m.group(1), m.group(2), m.group(3))
 
         p = Package(m.group(1))
+        p.category = category
         p.version = m.group(2)
         p.released = m.group(4)
         p.url = os.path.join(url, filename)
@@ -158,6 +160,7 @@ def parse_cairo_page(category='library'):
         filename = "%s-%s.%s" %(m.group(1), m.group(2), m.group(3))
 
         p = Package(m.group(1))
+        p.category = category
         p.version = m.group(2)
         p.released = m.group(4)
         p.url = os.path.join(url, filename)
