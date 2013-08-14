@@ -168,15 +168,36 @@ def parse_cairo_page(category='library'):
 
     return packages
 
+def parse_ffmpeg_page(category='library'):
+    url = 'http://ffmpeg.org/releases/'
+    package_pattern = '>(\w+)-([\.\d]+)\.(tar\.bz2)</a>\s*(\d+-\w+-\d+) (\d+:\d+)'
+    packages = {}
+    re_pkg = re.compile(package_pattern)
+    for line in readurl(url).split("\n"):
+        m = re_pkg.search(line)
+        if not m:
+            continue
+        filename = "%s-%s.%s" %(m.group(1), m.group(2), m.group(3))
+
+        p = Package(m.group(1))
+        p.category = category
+        p.version = m.group(2)
+        p.released = m.group(4)
+        p.url = os.path.join(url, filename)
+        packages.setdefault(p.name, []).append(p.__dict__)
+
+    return packages
+
 
 if __name__ == "__main__":
     try:
         data = {}
-        #data.update(parse_xorg_top())
-        #data.update(parse_xterm_page())
-        #data.update(parse_wayland_page())
-        #data.update(parse_cairo_page())
+        data.update(parse_xorg_top())
+        data.update(parse_xterm_page())
+        data.update(parse_wayland_page())
+        data.update(parse_cairo_page())
         data.update(parse_mesa_page())
+        data.update(parse_ffmpeg_page())
     except:
         raise
 
