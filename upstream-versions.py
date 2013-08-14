@@ -90,7 +90,6 @@ def parse_xorg_page(url, category=None):
 def parse_xterm_page(category=None):
     url = 'ftp://invisible-island.net/xterm/'
     package_pattern = '\d+ (\w+ +\d+ +[\d:]+) (xterm)-(\d+)\.(tgz)'
-    vcs_base = None
     packages = {}
     re_pkg = re.compile(package_pattern)
     for line in readurl(url).split("\n"):
