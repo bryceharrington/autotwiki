@@ -193,6 +193,8 @@ if __name__ == "__main__":
     from optparse import OptionParser
 
     parser = OptionParser(usage="%prog [OPTIONS] <video> [item [item...]]")
+    parser.add_option('-i', '--input-file', action='store', dest='input_file',
+                      help="Use data from JSON file instead of querying web", default=None)
     parser.add_option('-j', '--json', action='store_true', dest='json_output',
                       help="Dump all data to stdout as JSON text", default=False)
     parser.add_option('-l', '--list', action='store_true', dest='list_output',
@@ -201,22 +203,34 @@ if __name__ == "__main__":
                       help="List new releases made within the past month", default=False)
     (options, args) = parser.parse_args()
 
-    try:
-        data = {}
-        data.update(parse_xorg_top())
-        data.update(parse_xterm_page())
-        data.update(parse_wayland_page())
-        data.update(parse_cairo_page())
-        data.update(parse_mesa_page())
-        data.update(parse_ffmpeg_page())
-    except:
-        raise
+    data = {}
+    if options.input_file is not None:
+        s = open(options.input_file).read()
+        data = json.loads(s)
+    else:
+        try:
+            data.update(parse_xorg_top())
+            data.update(parse_xterm_page())
+            data.update(parse_wayland_page())
+            data.update(parse_cairo_page())
+            data.update(parse_mesa_page())
+            data.update(parse_ffmpeg_page())
+        except:
+            raise
 
     if options.json_output:
         print json.dumps(data, indent=4)
+
     elif options.list_output:
         print "TODO"
+
     elif options.new_only:
         print "TODO"
+
     else:
         print "TODO"
+        for pkg_name in data.keys():
+            for package in data[pkg_name]:
+                # TODO: Compare version numbers
+                version = package['version']
+            print "%-30s %s" %(pkg_name, version)
