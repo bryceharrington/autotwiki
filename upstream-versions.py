@@ -225,7 +225,9 @@ if __name__ == "__main__":
         print json.dumps(data, indent=4)
 
     elif options.list_output:
-        print "TODO"
+        for pkg_name in data.keys():
+            for package in data[pkg_name]:
+                print "%-30s %-12s %s" %(pkg_name, package['version'], package['released'])
 
     elif options.new_only:
         today = datetime.today()
@@ -244,6 +246,7 @@ if __name__ == "__main__":
                     if line not in already_printed:
                         print line
                         already_printed[line] = 1
+
     else:
         for pkg_name in data.keys():
             version = None
