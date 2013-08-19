@@ -7,6 +7,7 @@ import re
 import os
 import json
 import urllib2
+from distutils.version import LooseVersion
 
 # TODO: Use beautifulsoup instead of manually parsing the page
 
@@ -228,9 +229,12 @@ if __name__ == "__main__":
         print "TODO"
 
     else:
-        print "TODO"
         for pkg_name in data.keys():
+            version = None
             for package in data[pkg_name]:
-                # TODO: Compare version numbers
-                version = package['version']
+                pkg_version = LooseVersion(package['version'])
+
+                # Compare version numbers
+                if (version is None or pkg_version > version):
+                    version = pkg_version
             print "%-30s %s" %(pkg_name, version)
