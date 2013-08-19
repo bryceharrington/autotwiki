@@ -192,17 +192,19 @@ def parse_ffmpeg_page(category='library'):
 
 if __name__ == "__main__":
     from optparse import OptionParser
+    from datetime import datetime, timedelta
+    from dateutil import parser as date_parser
 
-    parser = OptionParser(usage="%prog [OPTIONS] <video> [item [item...]]")
-    parser.add_option('-i', '--input-file', action='store', dest='input_file',
-                      help="Use data from JSON file instead of querying web", default=None)
-    parser.add_option('-j', '--json', action='store_true', dest='json_output',
-                      help="Dump all data to stdout as JSON text", default=False)
-    parser.add_option('-l', '--list', action='store_true', dest='list_output',
-                      help="Summarize data in a textual list", default=False)
-    parser.add_option('-n', '--new', action='store_true', dest='new_only',
-                      help="List new releases made within the past month", default=False)
-    (options, args) = parser.parse_args()
+    opt_parser = OptionParser(usage="%prog [OPTIONS] <video> [item [item...]]")
+    opt_parser.add_option('-i', '--input-file', action='store', dest='input_file',
+                          help="Use data from JSON file instead of querying web", default=None)
+    opt_parser.add_option('-j', '--json', action='store_true', dest='json_output',
+                          help="Dump all data to stdout as JSON text", default=False)
+    opt_parser.add_option('-l', '--list', action='store_true', dest='list_output',
+                          help="Summarize data in a textual list", default=False)
+    opt_parser.add_option('-n', '--new', action='store_true', dest='new_only',
+                          help="List new releases made within the past month", default=False)
+    (options, args) = opt_parser.parse_args()
 
     data = {}
     if options.input_file is not None:
@@ -226,8 +228,22 @@ if __name__ == "__main__":
         print "TODO"
 
     elif options.new_only:
-        print "TODO"
+        today = datetime.today()
+        one_month_ago = today - timedelta(days=31)
+        already_printed = {}
 
+        for pkg_name in data.keys():
+            for package in data[pkg_name]:
+                # If release was this month, print it
+                d = date_parser.parse(package['released'])
+                # If d is None, then what?
+                if d > one_month_ago:
+                    released = d.strftime("%Y-%m-%d")
+
+                    line = "%-30s %-12s %s" %(pkg_name, package['version'], released)
+                    if line not in already_printed:
+                        print line
+                        already_printed[line] = 1
     else:
         for pkg_name in data.keys():
             version = None
