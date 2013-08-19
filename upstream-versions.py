@@ -113,7 +113,7 @@ def parse_mesa_page(category='library'):
     packages = {}
     re_pkg = re.compile(package_pattern)
     for line in readurl(url).split("\n"):
-        print line
+        #print line
         m = re_pkg.search(line)
         if not m:
             continue
@@ -190,6 +190,17 @@ def parse_ffmpeg_page(category='library'):
 
 
 if __name__ == "__main__":
+    from optparse import OptionParser
+
+    parser = OptionParser(usage="%prog [OPTIONS] <video> [item [item...]]")
+    parser.add_option('-j', '--json', action='store_true', dest='json_output',
+                      help="Dump all data to stdout as JSON text", default=False)
+    parser.add_option('-l', '--list', action='store_true', dest='list_output',
+                      help="Summarize data in a textual list", default=False)
+    parser.add_option('-n', '--new', action='store_true', dest='new_only',
+                      help="List new releases made within the past month", default=False)
+    (options, args) = parser.parse_args()
+
     try:
         data = {}
         data.update(parse_xorg_top())
@@ -201,6 +212,11 @@ if __name__ == "__main__":
     except:
         raise
 
-    data['_header'] = {
-        }
-    print json.dumps(data, indent=4)
+    if options.json_output:
+        print json.dumps(data, indent=4)
+    elif options.list_output:
+        print "TODO"
+    elif options.new_only:
+        print "TODO"
+    else:
+        print "TODO"
