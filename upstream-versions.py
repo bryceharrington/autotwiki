@@ -234,6 +234,7 @@ if __name__ == "__main__":
         one_month_ago = today - timedelta(days=31)
         already_printed = {}
 
+        print "<table>"
         for pkg_name in data.keys():
             for package in data[pkg_name]:
                 # If release was this month, print it
@@ -242,10 +243,12 @@ if __name__ == "__main__":
                 if d > one_month_ago:
                     released = d.strftime("%Y-%m-%d")
 
-                    line = "%-30s %-12s %s" %(pkg_name, package['version'], released)
+                    line = "<tr><td>%-30s</td> <td>%-12s</td> <td>%s</td></tr>" %(
+                        pkg_name, package['version'], released)
                     if line not in already_printed:
                         print line
                         already_printed[line] = 1
+        print "</table>"
 
     else:
         for pkg_name in data.keys():
