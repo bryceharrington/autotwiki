@@ -1,0 +1,52 @@
+#!/usr/bin/python
+
+import os
+import re
+import sys
+import json
+import mechanize
+from datetime import datetime
+
+# Configuration
+config_filename = os.path.expanduser('~/.config/autotwiki.conf')
+with open(config_filename, 'r') as f:
+    config = json.load(f)
+
+domain = config['domain']
+username = config['username']
+password = config['password']
+team = config['team']
+
+# Calculate the current week
+today = datetime.date(datetime.now())
+(year, week, weekday) = today.isocalendar()
+
+# Browser
+br = mechanize.Browser()
+
+# Debugging
+#br.set_debug_http(True)
+# br.set_debug_redirects(True)
+# br.set_debug_responses(True)
+
+# Credentials
+br.add_password(domain, username, password)
+
+url = "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
+    domain, team, username, week, year)
+r = br.open(url)
+
+#for f in br.forms():
+#    print f
+# form element 'text'
+
+# Select the first (index zero) form
+br.select_form(nr=0)
+
+text = br.form['text']
+br.form['text'] = text.replace("__Upstream Development:__", "__Foo Bar Development__")
+br.submit()
+print br.response().read()
+
+#orig_html = r.read()
+#new_html = orig_html.replace("> Development <", "> Development - 42 Patches <")
