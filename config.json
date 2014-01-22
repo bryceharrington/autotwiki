@@ -1,0 +1,8 @@
+{
+    "domain": "http://osg.sisa.samsung.com",
+    "username": "YourWikiName",
+    "password": "<your-wiki-password-here>",
+    "team": "OpenSourceGroup",
+
+    "status-template": "~/.config/autotwiki/status-template.html"
+}
