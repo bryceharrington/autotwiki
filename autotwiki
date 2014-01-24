@@ -5,7 +5,32 @@ import re
 import sys
 import json
 import mechanize
-from datetime import datetime
+from datetime import (datetime, date, timedelta)
+
+def week_string(dt):
+    (year, week, weekday) = dt.isocalendar()
+    week_0 = dt - timedelta(days=weekday)
+    week_1 = dt + timedelta(days=(6-weekday))
+
+    month_0 = week_0.strftime("%b")
+    day_0 = week_0.strftime("%e").strip()
+    year_0 = week_0.strftime("%Y")
+
+    month_1 = week_1.strftime("%b")
+    day_1 = week_1.strftime("%e").strip()
+    year_1 = week_1.strftime("%Y")
+
+    if year_0 != year_1:
+        return "%s %s, %s - %s %s, %s" %(
+            month_0, day_0, year_0,
+            month_1, day_1, year_1)
+    elif month_0 != month_1:
+        return "%s %s - %s %s, %s" %(
+            month_0, day_0,
+            month_1, day_1, year_1)
+    else:
+        return "%s %s - %s, %s" %(
+            month_0, day_0, day_1, year_1)
 
 # Configuration
 config_filename = os.path.expanduser('~/.config/autotwiki/config.json')
@@ -46,6 +71,10 @@ if len(text) < 100:
     with open(config_filename, 'r') as f:
         text = f.read()
 
+text = re.sub('\[\[full-name\]\]', username, text)
+text = re.sub('\[\[week-number\]\]', str(week), text)
+text = re.sub('\[\[week-string\]\]', week_string(today), text)
+
 text = re.sub(r'<li> Patches submitted: \d+ \(\d+ this year\)<\/li>',
               "<li> Patches submitted: %d (%d this year)</li>" %(
               1, 2), text)
@@ -66,11 +95,7 @@ text = re.sub(r'<li> Bugs fixed: \d+ \(\d+ this year\)<\/li>',
               "<li> Bugs fixed: %d (%d this year)</li>" %(
               9, 10), text)
 
-print text
 br.form['text'] = text
-
-
-sys.exit(0)
 br.submit()
 print br.response().read()
 
