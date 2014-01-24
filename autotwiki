@@ -41,6 +41,7 @@ domain = config['domain']
 username = config['username']
 password = config['password']
 team = config['team']
+dryrun = config.get('dryrun', False)
 
 # Calculate the current week
 today = datetime.date(datetime.now())
@@ -94,6 +95,10 @@ text = re.sub(r'<li> Bugs reported: \d+ \(\d+ this year\)<\/li>',
 text = re.sub(r'<li> Bugs fixed: \d+ \(\d+ this year\)<\/li>',
               "<li> Bugs fixed: %d (%d this year)</li>" %(
               9, 10), text)
+
+if dryrun:
+    print text
+    sys.exit(0)
 
 br.form['text'] = text
 br.submit()
