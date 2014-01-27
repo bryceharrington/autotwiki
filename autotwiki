@@ -5,32 +5,36 @@ import re
 import sys
 import json
 import mechanize
-from datetime import (datetime, date, timedelta)
+from datetime import (datetime, timedelta)
 
-def week_string(dt):
-    (year, week, weekday) = dt.isocalendar()
-    week_0 = dt - timedelta(days=weekday)
-    week_1 = dt + timedelta(days=(6-weekday))
+def week_description(d):
+    """Return a description of the calendar week (Sunday to Saturday)
+    containing the date d, avoiding repetition.
 
-    month_0 = week_0.strftime("%b")
-    day_0 = week_0.strftime("%e").strip()
-    year_0 = week_0.strftime("%Y")
+    >>> from datetime import date
+    >>> week_description(date(2013, 12, 30))
+    'Dec 29, 2013 - Jan 4, 2014'
+    >>> week_description(date(2014, 1, 25))
+    'Jan 19 - 25, 2014'
+    >>> week_description(date(2014, 1, 26))
+    'Jan 26 - Feb 1, 2014'
 
-    month_1 = week_1.strftime("%b")
-    day_1 = week_1.strftime("%e").strip()
-    year_1 = week_1.strftime("%Y")
+    """
+    begin = d - timedelta(days=d.isoweekday() % 7)
+    end = begin + timedelta(days=6)
 
-    if year_0 != year_1:
-        return "%s %s, %s - %s %s, %s" %(
-            month_0, day_0, year_0,
-            month_1, day_1, year_1)
-    elif month_0 != month_1:
-        return "%s %s - %s %s, %s" %(
-            month_0, day_0,
-            month_1, day_1, year_1)
+    assert begin.isoweekday() == 7 # Sunday
+    assert end.isoweekday() == 6   # Saturday
+    assert begin <= d <= end
+
+    if begin.year != end.year:
+        fmt = '{0:%b} {0.day}, {0.year} - {1:%b} {1.day}, {1.year}'
+    elif begin.month != end.month:
+        fmt = "{0:%b} {0.day} - {1:%b} {1.day}, {1.year}"
     else:
-        return "%s %s - %s, %s" %(
-            month_0, day_0, day_1, year_1)
+        fmt = "{0:%b} {0.day} - {1.day}, {1.year}"
+
+    return fmt.format(begin, end)
 
 # Configuration
 config_filename = os.path.expanduser('~/.config/autotwiki/config.json')
@@ -74,7 +78,7 @@ if len(text) < 100:
 
 text = re.sub('\[\[full-name\]\]', username, text)
 text = re.sub('\[\[week-number\]\]', str(week), text)
-text = re.sub('\[\[week-string\]\]', week_string(today), text)
+text = re.sub('\[\[week-string\]\]', week_description(today), text)
 
 text = re.sub(r'<li> Patches submitted: \d+ \(\d+ this year\)<\/li>',
               "<li> Patches submitted: %d (%d this year)</li>" %(
