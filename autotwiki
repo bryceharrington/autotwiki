@@ -36,77 +36,78 @@ def week_description(d):
 
     return fmt.format(begin, end)
 
-# Configuration
-config_filename = os.path.expanduser('~/.config/autotwiki/config.json')
-with open(config_filename, 'r') as f:
-    config = json.load(f)
-
-domain = config['domain']
-username = config['username']
-password = config['password']
-team = config['team']
-dryrun = config.get('dryrun', False)
-
-# Calculate the current week
-today = datetime.date(datetime.now())
-(year, week, weekday) = today.isocalendar()
-
-# Browser
-br = mechanize.Browser()
-
-# Debugging
-# br.set_debug_http(True)
-# br.set_debug_redirects(True)
-# br.set_debug_responses(True)
-
-# Credentials
-br.add_password(domain, username, password)
-
-url = "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
-    domain, team, username, week, year)
-r = br.open(url)
-
-# Select the first (index zero) form
-br.select_form(nr=0)
-
-text = br.form['text']
-if len(text) < 100:
-    # Topic looks like it hasn't been created yet
-    config_filename = os.path.expanduser(config['status-template'])
+if __name__ == "__main__":
+    # Configuration
+    config_filename = os.path.expanduser('~/.config/autotwiki/config.json')
     with open(config_filename, 'r') as f:
-        text = f.read()
+        config = json.load(f)
 
-text = re.sub('\[\[full-name\]\]', username, text)
-text = re.sub('\[\[week-number\]\]', str(week), text)
-text = re.sub('\[\[week-string\]\]', week_description(today), text)
+    domain = config['domain']
+    username = config['username']
+    password = config['password']
+    team = config['team']
+    dryrun = config.get('dryrun', False)
 
-text = re.sub(r'<li> Patches submitted: \d+ \(\d+ this year\)<\/li>',
-              "<li> Patches submitted: %d (%d this year)</li>" %(
-              1, 2), text)
+    # Calculate the current week
+    today = datetime.date(datetime.now())
+    (year, week, weekday) = today.isocalendar()
 
-text = re.sub(r'<li> Patches landed: \d+ \(\d+ this year\)<\/li>',
-              "<li> Patches landed: %d (%d this year)</li>" %(
-              3, 4), text)
+    # Browser
+    br = mechanize.Browser()
 
-text = re.sub(r'<li> Patches reviewed: \d+ \(\d+ this year\)<\/li>',
-              "<li> Patches reviewed: %d (%d this year)</li>" %(
-              5, 6), text)
+    # Debugging
+    # br.set_debug_http(True)
+    # br.set_debug_redirects(True)
+    # br.set_debug_responses(True)
 
-text = re.sub(r'<li> Bugs reported: \d+ \(\d+ this year\)<\/li>',
-              "<li> Bugs reported: %d (%d this year)</li>" %(
-              7, 8), text)
+    # Credentials
+    br.add_password(domain, username, password)
 
-text = re.sub(r'<li> Bugs fixed: \d+ \(\d+ this year\)<\/li>',
-              "<li> Bugs fixed: %d (%d this year)</li>" %(
-              9, 10), text)
+    url = "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
+        domain, team, username, week, year)
+    r = br.open(url)
 
-if dryrun:
-    print text
-    sys.exit(0)
+    # Select the first (index zero) form
+    br.select_form(nr=0)
 
-br.form['text'] = text
-br.submit()
-print br.response().read()
+    text = br.form['text']
+    if len(text) < 100:
+        # Topic looks like it hasn't been created yet
+        config_filename = os.path.expanduser(config['status-template'])
+        with open(config_filename, 'r') as f:
+            text = f.read()
 
-#orig_html = r.read()
-#new_html = orig_html.replace("> Development <", "> Development - 42 Patches <")
+    text = re.sub('\[\[full-name\]\]', username, text)
+    text = re.sub('\[\[week-number\]\]', str(week), text)
+    text = re.sub('\[\[week-string\]\]', week_description(today), text)
+
+    text = re.sub(r'<li> Patches submitted: \d+ \(\d+ this year\)<\/li>',
+                  "<li> Patches submitted: %d (%d this year)</li>" %(
+                      1, 2), text)
+
+    text = re.sub(r'<li> Patches landed: \d+ \(\d+ this year\)<\/li>',
+                  "<li> Patches landed: %d (%d this year)</li>" %(
+                      3, 4), text)
+
+    text = re.sub(r'<li> Patches reviewed: \d+ \(\d+ this year\)<\/li>',
+                  "<li> Patches reviewed: %d (%d this year)</li>" %(
+                      5, 6), text)
+
+    text = re.sub(r'<li> Bugs reported: \d+ \(\d+ this year\)<\/li>',
+                  "<li> Bugs reported: %d (%d this year)</li>" %(
+                      7, 8), text)
+
+    text = re.sub(r'<li> Bugs fixed: \d+ \(\d+ this year\)<\/li>',
+                  "<li> Bugs fixed: %d (%d this year)</li>" %(
+                      9, 10), text)
+
+    if dryrun:
+        print text
+        sys.exit(0)
+
+    br.form['text'] = text
+    br.submit()
+    print br.response().read()
+
+    #orig_html = r.read()
+    #new_html = orig_html.replace("> Development <", "> Development - 42 Patches <")
