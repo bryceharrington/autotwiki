@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import json
+import string
 import mechanize
 from optparse import OptionParser
 from datetime import (datetime, timedelta)
@@ -112,29 +113,25 @@ if __name__ == "__main__":
         with open(config_filename, 'r') as f:
             text = f.read()
 
-    text = re.sub('\[\[full-name\]\]', username, text)
-    text = re.sub('\[\[week-number\]\]', str(week), text)
-    text = re.sub('\[\[week-string\]\]', week_description(today), text)
+    params = {
+        'username':               username,
+        'full_name':              username,
+        'week_number':            str(week),
+        'week_string':            week_description(today),
 
-    text = re.sub(r'<li> Patches submitted: \d+ \(\d+ this year\)<\/li>',
-                  "<li> Patches submitted: %d (%d this year)</li>" %(
-                      1, 2), text)
+        'patches_submitted_week': 1,
+        'patches_landed_week':    1,
+        'patches_reviewed_week':  1,
+        'bugs_reported_week':     1,
+        'bugs_fixed_week':        1,
 
-    text = re.sub(r'<li> Patches landed: \d+ \(\d+ this year\)<\/li>',
-                  "<li> Patches landed: %d (%d this year)</li>" %(
-                      3, 4), text)
-
-    text = re.sub(r'<li> Patches reviewed: \d+ \(\d+ this year\)<\/li>',
-                  "<li> Patches reviewed: %d (%d this year)</li>" %(
-                      5, 6), text)
-
-    text = re.sub(r'<li> Bugs reported: \d+ \(\d+ this year\)<\/li>',
-                  "<li> Bugs reported: %d (%d this year)</li>" %(
-                      7, 8), text)
-
-    text = re.sub(r'<li> Bugs fixed: \d+ \(\d+ this year\)<\/li>',
-                  "<li> Bugs fixed: %d (%d this year)</li>" %(
-                      9, 10), text)
+        'patches_submitted_year': 1,
+        'patches_landed_year':    1,
+        'patches_reviewed_year':  1,
+        'bugs_reported_year':     1,
+        'bugs_fixed_year':        1,
+        }
+    text = string.Template(text).substitute(params)
 
     if dryrun:
         print text
