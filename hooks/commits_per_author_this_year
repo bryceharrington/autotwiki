@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd $1
+year_start="01-01-$(date +%Y)"
+echo $year_start
+
+git log --since ${year_start} | git shortlog -sne
