@@ -47,8 +47,12 @@ class Autotwiki(object):
 
         # Parse options
         parser = OptionParser(usage="%prog [OPTIONS] <repository>")
+        parser.add_option('-n', '--new', action='store_true', dest='new',
+                          help="Overwrite status page with new content generated from template",
+                          default=False)
         parser.add_option('-v', '--version', action='store_true', dest='version_and_exit',
-                          help="Print version number and exit", default=False)
+                          help="Print version number and exit",
+                          default=False)
         (self.options, self.args) = parser.parse_args()
 
 
@@ -73,28 +77,38 @@ if __name__ == "__main__":
     today = datetime.date(datetime.now())
     (year, week, weekday) = today.isocalendar()
 
-    # Browser
-    br = mechanize.Browser()
+    local = True
+    if not app.options.new:
+        local = False
+    if not dryrun:
+        local = False
 
-    # Debugging
-    # br.set_debug_http(True)
-    # br.set_debug_redirects(True)
-    # br.set_debug_responses(True)
+    text = ''
+    if not local:
+        # Browser
+        br = mechanize.Browser()
 
-    # Credentials
-    br.add_password(domain, username, password)
+        # Debugging
+        # br.set_debug_http(True)
+        # br.set_debug_redirects(True)
+        # br.set_debug_responses(True)
 
-    url = "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
-        domain, team, username, week, year)
-    r = br.open(url)
+        # Credentials
+        br.add_password(domain, username, password)
 
-    # Select the first (index zero) form
-    br.select_form(nr=0)
+        url = "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
+            domain, team, username, week, year)
+        r = br.open(url)
 
-    text = br.form['text']
+        # Select the first (index zero) form
+        br.select_form(nr=0)
+
+        if not app.options.new:
+            text = br.form['text']
+
     if len(text) < 100:
         # Topic looks like it hasn't been created yet
-        config_filename = os.path.expanduser(config['status-template'])
+        config_filename = os.path.expanduser(app.config['status-template'])
         with open(config_filename, 'r') as f:
             text = f.read()
 
@@ -126,9 +140,7 @@ if __name__ == "__main__":
         print text
         sys.exit(0)
 
-    br.form['text'] = text
-    br.submit()
-    print br.response().read()
-
-    #orig_html = r.read()
-    #new_html = orig_html.replace("> Development <", "> Development - 42 Patches <")
+    if not local:
+        br.form['text'] = text
+        br.submit()
+        print br.response().read()
