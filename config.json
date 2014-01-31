@@ -3,7 +3,7 @@
     "username": "YourWikiName",
     "password": "<your-wiki-password-here>",
     "team": "OpenSourceGroup",
-    "dryrun": "true",
+    "dry-run": "true",
 
     "status-template": "~/.config/autotwiki/status-template.html"
 }

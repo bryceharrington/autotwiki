@@ -48,13 +48,22 @@ class Autotwiki(object):
 
         # Parse options
         parser = OptionParser(usage="%prog [OPTIONS] <repository>")
-        parser.add_option('-n', '--new', action='store_true', dest='new',
+        parser.add_option('--dry-run', action='store_true', dest='dryrun',
+                          help="Don't update the remote website",
+                          default=False)
+        parser.add_option('--new', action='store_true', dest='new',
                           help="Overwrite status page with new content generated from template",
                           default=False)
         parser.add_option('-v', '--version', action='store_true', dest='version_and_exit',
                           help="Print version number and exit",
                           default=False)
         (self.options, self.args) = parser.parse_args()
+
+    @property
+    def dryrun(self):
+        if self.options.dryrun:
+            return True
+        return self.config.get('dry-run', False)
 
 
 if __name__ == "__main__":
@@ -72,7 +81,6 @@ if __name__ == "__main__":
     username = app.config['username']
     password = app.config['password']
     team = app.config['team']
-    dryrun = app.config.get('dryrun', False)
 
     # Calculate the current week
     today = datetime.date(datetime.now())
@@ -81,7 +89,7 @@ if __name__ == "__main__":
     local = True
     if not app.options.new:
         local = False
-    if not dryrun:
+    if not app.dryrun:
         local = False
 
     text = ''
@@ -133,7 +141,7 @@ if __name__ == "__main__":
         }
     text = string.Template(text).substitute(params)
 
-    if dryrun:
+    if app.dryrun:
         print text
         sys.exit(0)
 
