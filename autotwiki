@@ -48,6 +48,9 @@ class Autotwiki(object):
 
         # Parse options
         parser = OptionParser(usage="%prog [OPTIONS] <repository>")
+        parser.add_option('--debug', action='store_true', dest='debug',
+                          help="Enable detailed debugging output",
+                          default=False)
         parser.add_option('--dry-run', action='store_true', dest='dryrun',
                           help="Don't update the remote website",
                           default=False)
@@ -98,9 +101,10 @@ if __name__ == "__main__":
         br = mechanize.Browser()
 
         # Debugging
-        # br.set_debug_http(True)
-        # br.set_debug_redirects(True)
-        # br.set_debug_responses(True)
+        if app.options.debug:
+            br.set_debug_http(True)
+            br.set_debug_redirects(True)
+            br.set_debug_responses(True)
 
         # Credentials
         br.add_password(domain, username, password)
