@@ -5,6 +5,7 @@ import re
 import sys
 import json
 import mechanize
+from optparse import OptionParser
 from datetime import (datetime, timedelta)
 
 def week_description(d):
@@ -36,17 +37,37 @@ def week_description(d):
 
     return fmt.format(begin, end)
 
+
+class Autotwiki(object):
+    def __init__(self):
+        # Configuration
+        config_filename = os.path.expanduser('~/.config/autotwiki/config.json')
+        with open(config_filename, 'r') as f:
+            self.config = json.load(f)
+
+        # Parse options
+        parser = OptionParser(usage="%prog [OPTIONS] <repository>")
+        parser.add_option('-v', '--version', action='store_true', dest='version_and_exit',
+                          help="Print version number and exit", default=False)
+        (self.options, self.args) = parser.parse_args()
+
+
 if __name__ == "__main__":
     # Configuration
-    config_filename = os.path.expanduser('~/.config/autotwiki/config.json')
-    with open(config_filename, 'r') as f:
-        config = json.load(f)
+    app = Autotwiki()
 
-    domain = config['domain']
-    username = config['username']
-    password = config['password']
-    team = config['team']
-    dryrun = config.get('dryrun', False)
+    if app.options.version_and_exit:
+        print("autotwiki version 0.1")
+        sys.exit(0)
+    elif len(app.args) < 1:
+        print("You must provide at least one repository")
+        sys.exit(1)
+
+    domain = app.config['domain']
+    username = app.config['username']
+    password = app.config['password']
+    team = app.config['team']
+    dryrun = app.config.get('dryrun', False)
 
     # Calculate the current week
     today = datetime.date(datetime.now())
