@@ -19,6 +19,7 @@ fi
 
 printf "%-30s %10s %10s %10s\n" "Repository" "This Week" "This Year" "All Time"
 for repository in /var/cache/autotwiki/repositories/*; do
+    hooks/update_repository $repository
     this_week=$(run_hook hooks/commits_per_author_this_week $repository $author)
     this_year=$(run_hook hooks/commits_per_author_this_year $repository $author)
     all_time=$(run_hook hooks/commits_per_author_all_time $repository $author)
