@@ -1,0 +1,26 @@
+#!/bin/bash
+
+run_hook() {
+    hook=$1
+    repo=$2
+    regex=$3
+    total=0
+    for result in $(${hook} ${repo} | grep -e "$regex" | awk '{print $1}'); do
+	(( total += result ))
+    done
+    echo $total
+}
+
+author=$*
+if [ -z "${author}" ]; then
+    echo "Usage: commit_stats <author-name-regex>"
+    exit
+fi
+
+printf "%-30s %10s %10s %10s\n" "Repository" "This Week" "This Year" "All Time"
+for repository in /var/cache/autotwiki/repositories/*; do
+    this_week=$(run_hook hooks/commits_per_author_this_week $repository $author)
+    this_year=$(run_hook hooks/commits_per_author_this_year $repository $author)
+    all_time=$(run_hook hooks/commits_per_author_all_time $repository $author)
+    printf "%-30s %10d %10d %10d\n"  $(basename $repository) $this_week $this_year $all_time
+done
