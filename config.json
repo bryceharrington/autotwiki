@@ -4,7 +4,41 @@
     "password": "<your-wiki-password-here>",
     "team": "OpenSourceGroup",
     "dry-run": "true",
+    "status-template": "~/.config/autotwiki/status-template.html",
 
-    "repositories": "/var/cache/autotwiki/repositories",
-    "status-template": "~/.config/autotwiki/status-template.html"
+    "projects": [
+	{ "name": "autotwiki",
+	  "repositories": [
+	      { "dir": "/var/cache/autotwiki/repositories/autotwiki" }
+	  ]
+	},
+	{ "name": "cairo",
+	  "repositories": [
+	      { "dir": "/var/cache/autotwiki/repositories/cairo" },
+	      { "dir": "/var/cache/autotwiki/repositories/cairo-www" }
+	  ]
+	},
+	{ "name": "cairogles",
+	  "repositories": [
+	      { "dir": "/var/cache/autotwiki/repositories/cairogles" }
+	  ]
+	},
+	{ "name": "caskbench",
+	  "repositories": [
+	      { "dir": "/var/cache/autotwiki/repositories/caskbench" }
+	  ]
+	},
+	{ "name": "skia",
+	  "repositories": [
+	      { "dir": "/var/cache/autotwiki/repositories/skia" }
+	  ]
+	},
+	{ "name": "wayland",
+	  "repositories": [
+	      { "dir": "/var/cache/autotwiki/repositories/wayland" },
+	      { "dir": "/var/cache/autotwiki/repositories/wayland-web" },
+	      { "dir": "/var/cache/autotwiki/repositories/weston" }
+	  ]
+	}
+    ]
 }

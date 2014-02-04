@@ -112,7 +112,44 @@ class Autotwiki(object):
             return True
         return self.config.get('dry-run', False)
 
-# TODO: Move mechanize.Browser into a TwikiBrowser class
+class TwikiBrowser(object):
+    def __init__(self, config):
+        self.br = mechanize.Browser()
+        self._url_loaded = None
+
+        # Credentials
+        self.domain = config['domain']
+        self.username = config['username']
+        self.team = config['team']
+        password = config['password']
+        self.br.add_password(self.domain, self.username, password)
+
+    def set_debug(self, value):
+        assert type(value) is bool
+        self.br.set_debug_http(value)
+        self.br.set_debug_redirects(value)
+        self.br.set_debug_responses(value)
+
+    def url_weekly_status(self, week):
+        """Given a Week object, returns a url for the twiki status page"""
+        return "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
+            self.domain, self.team, self.username, week.number, week.year)
+
+    def get_page(self, url):
+        self.br.open(url)
+        self._url_loaded = url
+
+        # Select the first (index zero) form
+        self.br.select_form(nr=0)
+        return self.br.form['text']
+
+    def set_page(self, url, text):
+        if url != self._url_loaded:
+            self.get_page(url)
+        self.br.form['text'] = text
+        self.br.submit()
+        return self.br.response().read()
+
 # TODO: Collect git stats via
 #       git shortlog -sne
 #       git log --since 01-01-2014 | git shortlog -sne
@@ -128,11 +165,6 @@ if __name__ == "__main__":
         print("You must provide at least one repository")
         sys.exit(1)
 
-    domain = app.config['domain']
-    username = app.config['username']
-    password = app.config['password']
-    team = app.config['team']
-
     week = Week(app.options.week_number)
 
     local = True
@@ -143,27 +175,12 @@ if __name__ == "__main__":
 
     text = ''
     if not local:
-        # Browser
-        br = mechanize.Browser()
-
-        # Debugging
-        if app.options.debug:
-            br.set_debug_http(True)
-            br.set_debug_redirects(True)
-            br.set_debug_responses(True)
-
-        # Credentials
-        br.add_password(domain, username, password)
-
-        url = "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
-            domain, team, username, week.number, week.year)
-        r = br.open(url)
-
-        # Select the first (index zero) form
-        br.select_form(nr=0)
+        twiki = TwikiBrowser(app.config)
+        twiki.set_debug(app.options.debug)
 
         if not app.options.new:
-            text = br.form['text']
+            url = twiki.url_weekly_status(week)
+            text = twiki.get_page(url)
 
     if len(text) < 100:
         # Topic looks like it hasn't been created yet
@@ -172,8 +189,8 @@ if __name__ == "__main__":
             text = f.read()
 
     params = {
-        'username':               username,
-        'full_name':              username,
+        'username':               app.config['username'],
+        'full_name':              app.config['username'],
         'week_number':            str(week.number),
         'week_string':            week.description(),
 
@@ -196,6 +213,4 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if not local:
-        br.form['text'] = text
-        br.submit()
-        print br.response().read()
+        print twiki.set_page(text)
