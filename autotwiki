@@ -7,11 +7,26 @@ import json
 import string
 import mechanize
 from optparse import OptionParser
-from datetime import (datetime, timedelta)
+from datetime import (date, datetime, timedelta)
 
 class Week(object):
-    def __init__(self, d):
-        self.date_in_week = d
+    STARTS_ON_SUNDAY = False
+
+    def __init__(self, week_number=None, year=None):
+        d = datetime.now()
+        if week_number is not None:
+            if year is None:
+                year = d.year
+            assert type(week_number) is int
+            assert type(year) is int
+
+            # Calculate the first day in the given week
+            fmt = '%Y-%U-%w' if Week.STARTS_ON_SUNDAY else '%Y-%W-%w'
+            d = datetime.strptime('%04d-%02d-1' %(year, week_number), fmt)
+            if date(year, 1, 4).isoweekday() > 4:
+                d -= timedelta(days=7)
+
+        self.date_in_week = datetime.date(d)
 
     @property
     def begin(self):
@@ -83,6 +98,9 @@ class Autotwiki(object):
         parser.add_option('-v', '--version', action='store_true', dest='version_and_exit',
                           help="Print version number and exit",
                           default=False)
+        parser.add_option('-w', '--week', action='store', type='int', dest='week_number',
+                          help="Generate report for the given week number rather than current",
+                          default=None)
         (self.options, self.args) = parser.parse_args()
 
     @property
@@ -112,8 +130,7 @@ if __name__ == "__main__":
     password = app.config['password']
     team = app.config['team']
 
-    # Calculate the current week
-    week = Week(datetime.date(datetime.now()))
+    week = Week(app.options.week_number)
 
     local = True
     if not app.options.new:
