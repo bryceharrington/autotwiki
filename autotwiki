@@ -9,34 +9,57 @@ import mechanize
 from optparse import OptionParser
 from datetime import (datetime, timedelta)
 
-def week_description(d):
-    """Return a description of the calendar week (Sunday to Saturday)
-    containing the date d, avoiding repetition.
+class Week(object):
+    def __init__(self, d):
+        self.date_in_week = d
 
-    >>> from datetime import date
-    >>> week_description(date(2013, 12, 30))
-    'Dec 29, 2013 - Jan 4, 2014'
-    >>> week_description(date(2014, 1, 25))
-    'Jan 19 - 25, 2014'
-    >>> week_description(date(2014, 1, 26))
-    'Jan 26 - Feb 1, 2014'
+    @property
+    def begin(self):
+        """Returns a date object for the first day of the week"""
+        weekday = self.date_in_week.isoweekday() % 7
+        begin = self.date_in_week - timedelta(days=weekday)
+        assert begin.isoweekday() == 7 # Sunday
+        return begin
 
-    """
-    begin = d - timedelta(days=d.isoweekday() % 7)
-    end = begin + timedelta(days=6)
+    @property
+    def end(self):
+        """Returns date object for the last day of the week"""
+        end = self.begin + timedelta(days=6)
+        assert end.isoweekday() == 6
+        return end
 
-    assert begin.isoweekday() == 7 # Sunday
-    assert end.isoweekday() == 6   # Saturday
-    assert begin <= d <= end
+    @property
+    def number(self):
+        """Returns the week number of the date"""
+        return self.date_in_week.isocalendar()[1]
 
-    if begin.year != end.year:
-        fmt = '{0:%b} {0.day}, {0.year} - {1:%b} {1.day}, {1.year}'
-    elif begin.month != end.month:
-        fmt = "{0:%b} {0.day} - {1:%b} {1.day}, {1.year}"
-    else:
-        fmt = "{0:%b} {0.day} - {1.day}, {1.year}"
+    @property
+    def year(self):
+        """Returns the year from the end of the week"""
+        return self.end.year
 
-    return fmt.format(begin, end)
+    def description(self):
+        """Return a description of the calendar week (Sunday to Saturday)
+        containing the date d, avoiding repetition.
+
+        >>> from datetime import date
+        >>> Week(date(2013, 12, 30)).description()
+        'Dec 29, 2013 - Jan 4, 2014'
+        >>> Week(date(2014, 1, 25)).description()
+        'Jan 19 - 25, 2014'
+        >>> Week(date(2014, 1, 26)).description()
+        'Jan 26 - Feb 1, 2014'
+        """
+        assert self.begin <= self.date_in_week <= self.end
+
+        if self.begin.year != self.end.year:
+            fmt = '{0:%b} {0.day}, {0.year} - {1:%b} {1.day}, {1.year}'
+        elif self.begin.month != self.end.month:
+            fmt = "{0:%b} {0.day} - {1:%b} {1.day}, {1.year}"
+        else:
+            fmt = "{0:%b} {0.day} - {1.day}, {1.year}"
+
+        return fmt.format(self.begin, self.end)
 
 
 class Autotwiki(object):
@@ -68,6 +91,10 @@ class Autotwiki(object):
             return True
         return self.config.get('dry-run', False)
 
+# TODO: Move mechanize.Browser into a TwikiBrowser class
+# TODO: Collect git stats via
+#       git shortlog -sne
+#       git log --since 01-01-2014 | git shortlog -sne
 
 if __name__ == "__main__":
     # Configuration
@@ -86,8 +113,7 @@ if __name__ == "__main__":
     team = app.config['team']
 
     # Calculate the current week
-    today = datetime.date(datetime.now())
-    (year, week, weekday) = today.isocalendar()
+    week = Week(datetime.date(datetime.now()))
 
     local = True
     if not app.options.new:
@@ -110,7 +136,7 @@ if __name__ == "__main__":
         br.add_password(domain, username, password)
 
         url = "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
-            domain, team, username, week, year)
+            domain, team, username, week.number, week.year)
         r = br.open(url)
 
         # Select the first (index zero) form
@@ -128,8 +154,8 @@ if __name__ == "__main__":
     params = {
         'username':               username,
         'full_name':              username,
-        'week_number':            str(week),
-        'week_string':            week_description(today),
+        'week_number':            str(week.number),
+        'week_string':            week.description(),
 
         'patches_submitted_week': 1,
         'patches_landed_week':    1,
