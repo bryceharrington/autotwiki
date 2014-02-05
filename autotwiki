@@ -151,7 +151,12 @@ class TwikiBrowser(object):
         self.br.submit()
         return self.br.response().read()
 
-def get_commits(hook, repo, regex):
+def update_repository(repo):
+    p = Popen(["hooks/update_repository"], shell=False, stdout=PIPE, stderr=PIPE)
+    p.communicate()
+    return p.returncode
+
+def measure_commits(hook, repo, regex):
     """Executes hook and returns total number of commits"""
     total = 0
     p = Popen(["hooks/%s" %(hook), repo], shell=False, stdout=PIPE, stderr=PIPE)
@@ -180,54 +185,59 @@ if __name__ == "__main__":
     if not app.dryrun:
         local = False
 
+    page_params = {
+        'username':                app.config['username'],
+        'full_name':               app.config['username'],
+        'week_number':             str(week.number),
+        'week_string':             week.description(),
+        'patch_table':             ''
+        }
+
+    row_template = "<p>$project_name $this_week $this_year $all_time</p>\n"
+
     # Collect statistics
     author = re.compile(app.config['name'])
     print("%-30s %10s %10s %10s" %("Repository", "This Week", "This Year", "All Time"))
     for project in app.config['projects']:
-        this_week = 0
-        this_year = 0
-        all_time = 0
+        row_params = {
+            'project_name': project['name'],
+            'this_week': 0,
+            'this_year': 0,
+            'all_time': 0
+            }
         for repo in project['repositories']:
-            #execute("hooks/update_repository", $repository)
-            this_week += get_commits("commits_per_author_this_week", repo['location'], author)
-            this_year += get_commits("commits_per_author_this_year", repo['location'], author)
-            all_time += get_commits("commits_per_author_all_time", repo['location'], author)
+            if not update_repository(repo['location']):
+                sys.stderr.write("Error updating repository %s\n" %(repo['location']))
+                sys.exit(1)
+            this_week += measure_commits("commits_per_author_this_week", repo['location'], author)
+            this_year += measure_commits("commits_per_author_this_year", repo['location'], author)
+            all_time += measure_commits("commits_per_author_all_time", repo['location'], author)
         print("%-30s %10d %10d %10d" %(project['name'], this_week, this_year, all_time))
 
+        # TODO: Pass the collected data to one or more formatters
+        # TODO: Add the output of the formatters to params
+        patch_table_row = row_template %(project['name'], this_week, this_year, all_time)
+        page_params['patch_table'] += patch_table_row
+
+    # Prepare to interact with the remote twiki site
     text = ''
     if not local:
         twiki = TwikiBrowser(app.config)
         twiki.set_debug(app.options.debug)
 
+        # Retrieve the current status page text
         if not app.options.new:
             url = twiki.url_weekly_status(week)
             text = twiki.get_page(url)
 
+    # If current status page is empty, load from the template
     if len(text) < 100:
         # Topic looks like it hasn't been created yet
         config_filename = os.path.expanduser(app.config['status-template'])
         with open(config_filename, 'r') as f:
             text = f.read()
 
-    params = {
-        'username':               app.config['username'],
-        'full_name':              app.config['username'],
-        'week_number':            str(week.number),
-        'week_string':            week.description(),
-
-        'patches_submitted_week': 1,
-        'patches_landed_week':    1,
-        'patches_reviewed_week':  1,
-        'bugs_reported_week':     1,
-        'bugs_fixed_week':        1,
-
-        'patches_submitted_year': 1,
-        'patches_landed_year':    1,
-        'patches_reviewed_year':  1,
-        'bugs_reported_year':     1,
-        'bugs_fixed_year':        1,
-        }
-    text = string.Template(text).substitute(params)
+    text = string.Template(text).substitute(page_params)
 
     if app.dryrun:
         print text
