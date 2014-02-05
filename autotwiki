@@ -7,6 +7,7 @@ import json
 import string
 import mechanize
 from optparse import OptionParser
+from subprocess import (Popen, PIPE)
 from datetime import (date, datetime, timedelta)
 
 class Week(object):
@@ -150,9 +151,18 @@ class TwikiBrowser(object):
         self.br.submit()
         return self.br.response().read()
 
-# TODO: Collect git stats via
-#       git shortlog -sne
-#       git log --since 01-01-2014 | git shortlog -sne
+def get_commits(hook, repo, regex):
+    """Executes hook and returns total number of commits"""
+    total = 0
+    p = Popen(["hooks/%s" %(hook), repo], shell=False, stdout=PIPE, stderr=PIPE)
+    for line in p.stdout.readlines():
+        if not regex.search(line):
+            continue
+        value = line.split()[0]
+        assert value.isdigit()
+        total += int(value)
+    return total
+
 
 if __name__ == "__main__":
     # Configuration
@@ -161,9 +171,6 @@ if __name__ == "__main__":
     if app.options.version_and_exit:
         print("autotwiki version 0.1")
         sys.exit(0)
-    elif len(app.args) < 1:
-        print("You must provide at least one repository")
-        sys.exit(1)
 
     week = Week(app.options.week_number)
 
@@ -172,6 +179,20 @@ if __name__ == "__main__":
         local = False
     if not app.dryrun:
         local = False
+
+    # Collect statistics
+    author = re.compile(app.config['name'])
+    print("%-30s %10s %10s %10s" %("Repository", "This Week", "This Year", "All Time"))
+    for project in app.config['projects']:
+        this_week = 0
+        this_year = 0
+        all_time = 0
+        for repo in project['repositories']:
+            #execute("hooks/update_repository", $repository)
+            this_week += get_commits("commits_per_author_this_week", repo['location'], author)
+            this_year += get_commits("commits_per_author_this_year", repo['location'], author)
+            all_time += get_commits("commits_per_author_all_time", repo['location'], author)
+        print("%-30s %10d %10d %10d" %(project['name'], this_week, this_year, all_time))
 
     text = ''
     if not local:
