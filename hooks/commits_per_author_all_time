@@ -1,6 +1,0 @@
-#!/bin/bash
-
-cd $1
-git shortlog -sne
-
-#git log --since 01-01-2014 | git shortlog -sne

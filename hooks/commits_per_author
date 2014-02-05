@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ ! -d "$1" ]; then
+    echo "Usage:  $0 <repository> [begin-date] [end-date]" 2>&1
+    exit 1
+fi
+cd $1
+if [ ! -z "$2" ] && [ $2 != 'Beginning' ]; then
+    begin="--since $2"
+fi
+if [ ! -z "$3" ] && [ $3 != 'End' ]; then
+    end="--until $3"
+fi
+git log ${begin} ${end} | git shortlog -sne

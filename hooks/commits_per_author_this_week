@@ -1,6 +1,0 @@
-#!/bin/bash
-
-week_start=$(date -dlast-sunday +%m-%d-%Y)
-
-cd $1
-git log --since ${week_start} | git shortlog -sne
