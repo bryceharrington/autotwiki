@@ -1,0 +1,23 @@
+{
+    "domain": "http://osg.sisa.samsung.com",
+    "name": "Bruno de Oliveira Abinader",
+    "username": "BrunoAbinader",
+    "password": "<your-wiki-password-here>",
+    "team": "OpenSourceGroup",
+    "dry-run": true,
+    "status-template": "~/.config/autotwiki/status-template.html",
+    "row-template": "~/.config/autotwiki/row-template.html",
+
+    "projects": [
+	{ "name": "servo",
+	  "submissions": {
+	      "hook": "github-pull-requests",
+	      "author": "brunoabinader",
+	      "owner": "mozilla/servo"
+	  },
+	  "repositories": [
+	      { "location": "/var/cache/autotwiki/repositories/servo" }
+	  ]
+	}
+    ]
+}
