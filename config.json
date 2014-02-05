@@ -6,6 +6,7 @@
     "team": "OpenSourceGroup",
     "dry-run": true,
     "status-template": "~/.config/autotwiki/status-template.html",
+    "row-template": "~/.config/autotwiki/row-template.html",
 
     "projects": [
 	{ "name": "autotwiki",

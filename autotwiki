@@ -151,6 +151,12 @@ class TwikiBrowser(object):
         self.br.submit()
         return self.br.response().read()
 
+def load_file(fname):
+    filename = os.path.expanduser(fname)
+    with open(filename, 'r') as f:
+        text = f.read()
+    return text
+
 def update_repository(repo):
     p = Popen(["hooks/update_repository", repo], shell=False, stdout=PIPE, stderr=PIPE)
     p.communicate()
@@ -190,10 +196,10 @@ if __name__ == "__main__":
         'full_name':               app.config['username'],
         'week_number':             str(week.number),
         'week_string':             week.description(),
-        'patch_table':             ''
+        'patch_table_rows':        ''
         }
 
-    row_template = "<p>$project_name $this_week $this_year $all_time</p>\n"
+    row_template = load_file(app.config['row-template'])
 
     # Collect statistics
     author = re.compile(app.config['name'])
@@ -201,23 +207,47 @@ if __name__ == "__main__":
     for project in app.config['projects']:
         row_params = {
             'project_name': project['name'],
-            'this_week': 0,
-            'this_year': 0,
-            'all_time': 0
+
+            'patches_submitted_this_week': 0,
+            'patches_committed_this_week': 0,
+            'patches_reviewed_this_week': 0,
+            'bugs_fixed_this_week': 0,
+            'enhancements_this_week': 0,
+            'new_features_this_week': 0,
+            'patches_for_gbm_request_this_week': 0,
+
+            'patches_submitted_this_year': 0,
+            'patches_committed_this_year': 0,
+            'patches_reviewed_this_year': 0,
+            'bugs_fixed_this_year': 0,
+            'enhancements_this_year': 0,
+            'new_features_this_year': 0,
+            'patches_for_gbm_request_this_year': 0,
+
+            'patches_submitted_all_time': 0,
+            'patches_committed_all_time': 0,
+            'patches_reviewed_all_time': 0,
+            'bugs_fixed_all_time': 0,
+            'enhancements_all_time': 0,
+            'new_features_all_time': 0,
+            'patches_for_gbm_request_all_time': 0,
             }
         for repo in project['repositories']:
             if not update_repository(repo['location']):
                 sys.stderr.write("Error updating repository %s\n" %(repo['location']))
                 sys.exit(1)
-            this_week += measure_commits("commits_per_author_this_week", repo['location'], author)
-            this_year += measure_commits("commits_per_author_this_year", repo['location'], author)
-            all_time += measure_commits("commits_per_author_all_time", repo['location'], author)
-        print("%-30s %10d %10d %10d" %(project['name'], this_week, this_year, all_time))
+            row_params['patches_committed_this_week'] += measure_commits("commits_per_author_this_week", repo['location'], author)
+            row_params['patches_committed_this_year'] += measure_commits("commits_per_author_this_year", repo['location'], author)
+            row_params['patches_committed_all_time'] += measure_commits("commits_per_author_all_time", repo['location'], author)
+        print("%-30s %10d %10d %10d" %(project['name'],
+                                       row_params['patches_committed_this_week'],
+                                       row_params['patches_committed_this_year'],
+                                       row_params['patches_committed_all_time']))
 
         # TODO: Pass the collected data to one or more formatters
         # TODO: Add the output of the formatters to params
-        patch_table_row = row_template %(project['name'], this_week, this_year, all_time)
-        page_params['patch_table'] += patch_table_row
+        patch_table_row = string.Template(row_template).substitute(row_params)
+        page_params['patch_table_rows'] += patch_table_row
 
     # Prepare to interact with the remote twiki site
     text = ''
@@ -233,9 +263,7 @@ if __name__ == "__main__":
     # If current status page is empty, load from the template
     if len(text) < 100:
         # Topic looks like it hasn't been created yet
-        config_filename = os.path.expanduser(app.config['status-template'])
-        with open(config_filename, 'r') as f:
-            text = f.read()
+        text = load_file(app.config['status-template'])
 
     text = string.Template(text).substitute(page_params)
 
