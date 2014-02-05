@@ -15,7 +15,7 @@ def parse_url(url):
     if not result:
         error("unable to connect to feed: %s" % url)
     if result.status != 200:
-        error("invalid status: %d" % result.status)
+        error("invalid status: %d %s" % (result.status, url))
     if result.version != "atom10":
         error("invalid RSS feed type: %s" % result.version)
     if result.encoding != "utf-8":
@@ -31,6 +31,7 @@ def parse_public_activity(username, start, end):
         tag, event = id.split(",")
         return "PullRequestEvent" in event
 
+    request_counts = {}
     pull_request_count = 0
     PUB_ACTIVITY_FEED_URL = "https://github.com/{0}.atom"
     for entry in parse_url(PUB_ACTIVITY_FEED_URL.format(username)):
@@ -41,8 +42,11 @@ def parse_public_activity(username, start, end):
             continue
         if end is not None and end < as_datetime:
             continue
-        pull_request_count += 1
-    return pull_request_count
+        owner = "{0}/{1}".format(*entry.link.split('/')[3:5])
+        if owner not in request_counts.keys():
+            request_counts[owner] = 0
+        request_counts[owner] += 1
+    return request_counts
 
 def main(username, start, end):
     if start == 'Beginning':
@@ -54,7 +58,8 @@ def main(username, start, end):
     else:
         end_date = datetime.strptime(end, "%m-%d-%Y")
     submitted = parse_public_activity(username, start_date, end_date)
-    print "{0} pull-requests".format(submitted)
+    for owner, count in submitted.items():
+        print "{0} pull requests to {1}".format(count, owner)
     sys.exit()
 
 if __name__ == "__main__":

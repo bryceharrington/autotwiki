@@ -162,7 +162,7 @@ def update_repository(repo):
     p.communicate()
     return p.returncode == 0
 
-def measure_commits(hook, repo, regex, begin_date=None, end_date=None):
+def measure(hook, target, regex, begin_date=None, end_date=None):
     """Executes hook and returns total number of commits"""
     total = 0
     if begin_date is None:
@@ -173,8 +173,13 @@ def measure_commits(hook, repo, regex, begin_date=None, end_date=None):
         end = 'End'
     else:
         end = end_date.strftime('%m-%d-%Y')
-    cmd = ["hooks/%s" %(hook), repo, begin, end]
+    cmd = ["hooks/%s" %(hook), target, begin, end]
     p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE)
+    errors = p.stderr.readlines()
+    if len(errors)>0:
+        sys.stderr.write("Error running command:  %s\n" %(' '.join(cmd)))
+        sys.stderr.write('\n'.join(errors))
+        sys.exit(3)
     for line in p.stdout.readlines():
         if not regex.search(line):
             continue
@@ -193,6 +198,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     week = Week(app.options.week_number)
+    week_0 = Week(0)
 
     local = True
     if not app.options.new:
@@ -245,28 +251,50 @@ if __name__ == "__main__":
             if not update_repository(repo['location']):
                 sys.stderr.write("Error updating repository %s\n" %(repo['location']))
                 sys.exit(1)
-            c = measure_commits("commits_per_author",
-                                repo['location'],
-                                author,
-                                week.begin, week.end)
+
+            c = measure("commits_per_author",
+                        repo['location'],
+                        author,
+                        week.begin, week.end)
             row_params['patches_committed_this_week'] += c
 
-            week_0 = Week(0)
-            c = measure_commits("commits_per_author",
-                                repo['location'],
-                                author,
-                                week_0.begin, week.end)
+            c = measure("commits_per_author",
+                        repo['location'],
+                        author,
+                        week_0.begin, week.end)
             row_params['patches_committed_this_year'] += c
 
-            c = measure_commits("commits_per_author",
-                                repo['location'],
-                                author,
-                                None, week.end)
+            c = measure("commits_per_author",
+                        repo['location'],
+                        author,
+                        None, week.end)
             row_params['patches_committed_all_time'] += c
-        print("%-30s %10d %10d %10d" %(project['name'],
-                                       row_params['patches_committed_this_week'],
-                                       row_params['patches_committed_this_year'],
-                                       row_params['patches_committed_all_time']))
+
+            submissions = project.get('submissions', None)
+            if submissions is None:
+                continue
+
+            c = measure(submissions['hook'],
+                        submissions['author'],
+                        re.compile(submissions['owner']),
+                        week.begin, week.end)
+            row_params['patches_submitted_this_week'] += c
+
+            c = measure(submissions['hook'],
+                        submissions['author'],
+                        re.compile(submissions['owner']),
+                        week_0.begin, week.end)
+            row_params['patches_submitted_this_year'] += c
+
+            c = measure(submissions['hook'],
+                        submissions['author'],
+                        re.compile(submissions['owner']),
+                        None, week.end)
+            row_params['patches_submitted_all_time'] += c
+        #print("%-30s %10d %10d %10d" %(project['name'],
+        #                               row_params['patches_committed_this_week'],
+        #                               row_params['patches_committed_this_year'],
+        #                               row_params['patches_committed_all_time']))
 
         # TODO: Pass the collected data to one or more formatters
         # TODO: Add the output of the formatters to params
