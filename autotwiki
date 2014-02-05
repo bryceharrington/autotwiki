@@ -152,7 +152,7 @@ class TwikiBrowser(object):
         return self.br.response().read()
 
 def update_repository(repo):
-    p = Popen(["hooks/update_repository"], shell=False, stdout=PIPE, stderr=PIPE)
+    p = Popen(["hooks/update_repository", repo], shell=False, stdout=PIPE, stderr=PIPE)
     p.communicate()
     return p.returncode
 
