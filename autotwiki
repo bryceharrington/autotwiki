@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
     # Collect statistics
     author = re.compile(app.config['name'])
-    print("%-30s %10s %10s %10s" %("Repository", "This Week", "This Year", "All Time"))
+    #print("%-30s %10s %10s %10s" %("Repository", "This Week", "This Year", "All Time"))
     for project in app.config['projects']:
         row_params = {
             'project_name': project['name'],
@@ -324,4 +324,4 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if not local:
-        print twiki.set_page(text)
+        print twiki.set_page(url, text)
