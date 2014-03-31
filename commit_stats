@@ -1,11 +1,15 @@
 #!/bin/bash
 
+HOOKS=~/src/Autotwiki/autotwiki/hooks
+
 run_hook() {
     hook=$1
     repo=$2
-    regex=$3
+    beginning=$3
+    ending=$4
+    regex=$5
     total=0
-    for result in $(${hook} ${repo} | grep -e "$regex" | awk '{print $1}'); do
+    for result in $(${hook} ${repo} ${beginning} ${ending} | grep -e "$regex" | awk '{print $1}'); do
 	(( total += result ))
     done
     echo $total
@@ -17,11 +21,21 @@ if [ -z "${author}" ]; then
     exit
 fi
 
-printf "%-30s %10s %10s %10s\n" "Repository" "This Week" "This Year" "All Time"
+quarter=$(echo "$(date +%m)/4 + 1" | bc)
+quarter_year=$(date +%Y)
+quarter_month=$(( 1 + 4 * ($quarter - 1) ))
+quarter_day=1
+quarter_start=$(printf "%4d-%02d-%02d" $quarter_year $quarter_month $quarter_day)
+year_start=$(printf "%4d-01-01" $quarter_year)
+week_start=$(date -dlast-sunday +%Y-%m-%d)
+
+
+printf "%-30s %10s %10s %10s %10s\n" "Repository" "This Week" "This Quarter" "This Year" "All Time"
 for repository in /var/cache/autotwiki/repositories/*; do
-    hooks/update_repository $repository
-    this_week=$(run_hook hooks/commits_per_author_this_week $repository $author)
-    this_year=$(run_hook hooks/commits_per_author_this_year $repository $author)
-    all_time=$(run_hook hooks/commits_per_author_all_time $repository $author)
-    printf "%-30s %10d %10d %10d\n"  $(basename $repository) $this_week $this_year $all_time
+    ${HOOKS}/update_repository $repository
+    this_week=$(run_hook ${HOOKS}/commits_per_author $week_start End $repository $author)
+    this_quarter=$(run_hook ${HOOKS}/commits_per_author $repository $quarter_start End $author)
+    this_year=$(run_hook ${HOOKS}/commits_per_author $repository $year_start End $author)
+    all_time=$(run_hook ${HOOKS}/commits_per_author $repository Beginning End $author)
+    printf "%-30s %10d %10d %10d %10d\n"  $(basename $repository) $this_week $this_quarter $this_year $all_time
 done
