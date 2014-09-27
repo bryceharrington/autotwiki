@@ -175,7 +175,11 @@ def load_file(fname):
 
 def update_repository(repo):
     p = Popen(["hooks/update_repository", repo], shell=False, stdout=PIPE, stderr=PIPE)
-    p.communicate()
+    out, err = p.communicate()
+    if p.returncode != 0:
+        print "Error (%d) updating %s:" %(p.returncode, repo)
+        print out
+        sys.stderr.write(err)
     return p.returncode == 0
 
 def measure(hook, target, regex, begin_date=None, end_date=None):
