@@ -1,9 +1,17 @@
 autotwiki
-=========
+---------
 
 This script can be used to update your weekly status page in Twiki with
 the number of git commits, bug reports filed or closed, etc.
 
+Pre-requisites
+==============
+
+  $ sudo apt-get install python-mechanize
+  $ sudo mkdir -p /var/cache/autotwiki/repositories
+
+Usage
+=====
 The script assumes your status page can be edited at this URL:
 
   <domain>/bin/edit/<team>/<username>Week<WN>Status<Year>
