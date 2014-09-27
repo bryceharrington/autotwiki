@@ -328,8 +328,8 @@ if __name__ == "__main__":
         twiki.set_debug(app.options.debug)
 
         # Retrieve the current status page text
+        url = twiki.url_weekly_status(week)
         if not app.options.new:
-            url = twiki.url_weekly_status(week)
             text = twiki.get_page(url)
 
     # If current status page is empty, load from the template
