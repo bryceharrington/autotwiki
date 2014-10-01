@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Simple tool to log incoming patches
+
+logdir=/home/bryce/.local/share/autotwiki
+logfile=${logdir}/patch.log
+
+if [ ! -d ${logdir} ]; then
+    mkdir -p ${logdir}
+fi
+
+for patch in ${*}; do
+    echo ${patch} >> ${logfile}
+done
+
