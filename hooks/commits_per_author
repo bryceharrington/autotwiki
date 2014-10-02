@@ -21,9 +21,9 @@ if [ ! -d "$1" ]; then
 fi
 cd $1
 if [ ! -z "$2" ] && [ $2 != 'Beginning' ]; then
-    begin="--since $2"
+    begin="--since=$2"
 fi
 if [ ! -z "$3" ] && [ $3 != 'End' ]; then
-    end="--until $3"
+    end="--until=$3"
 fi
 git log ${begin} ${end} | git shortlog -sne
