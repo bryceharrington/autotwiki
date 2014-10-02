@@ -1,0 +1,12 @@
+#!/bin/bash
+today=$(date +%Y-%m-%d)
+
+mkdir ${today}
+
+for project in 'xorg' 'wayland' 'cairo'; do
+    echo $project
+    ./upstream-versions.py -n ${project} > ${today}/${project}.html
+    if [ $? == 0 ]; then
+	echo "  --> ${today}/${project}.html"
+    fi
+done
