@@ -191,6 +191,7 @@ def parse_ffmpeg_page(category='library'):
 
 
 if __name__ == "__main__":
+    import sys
     from optparse import OptionParser
     from datetime import datetime, timedelta
     from dateutil import parser as date_parser
@@ -203,8 +204,11 @@ if __name__ == "__main__":
     opt_parser.add_option('-l', '--list', action='store_true', dest='list_output',
                           help="Summarize data in a textual list", default=False)
     opt_parser.add_option('-n', '--new', action='store_true', dest='new_only',
-                          help="List new releases made within the past month", default=False)
+                          help="List new releases made within the past quarter", default=False)
     (options, args) = opt_parser.parse_args()
+
+    if len(args) == 0:
+        args = ['xorg', 'cairo', 'wayland', 'ffmpeg']
 
     data = {}
     if options.input_file is not None:
@@ -212,12 +216,16 @@ if __name__ == "__main__":
         data = json.loads(s)
     else:
         try:
-            data.update(parse_xorg_top())
-            data.update(parse_xterm_page())
-            data.update(parse_wayland_page())
-            data.update(parse_cairo_page())
-            data.update(parse_mesa_page())
-            data.update(parse_ffmpeg_page())
+            if 'xorg' in args:
+                data.update(parse_xorg_top())
+                data.update(parse_xterm_page())
+                data.update(parse_mesa_page())
+            if 'wayland' in args:
+                data.update(parse_wayland_page())
+            if 'cairo' in args:
+                data.update(parse_cairo_page())
+            if 'ffmpeg' in args:
+                data.update(parse_ffmpeg_page())
         except:
             raise
 
@@ -231,7 +239,7 @@ if __name__ == "__main__":
 
     elif options.new_only:
         today = datetime.today()
-        one_month_ago = today - timedelta(days=31)
+        three_months_ago = today - timedelta(days=90)
         already_printed = {}
 
         print "<table>"
@@ -240,7 +248,7 @@ if __name__ == "__main__":
                 # If release was this month, print it
                 d = date_parser.parse(package['released'])
                 # If d is None, then what?
-                if d > one_month_ago:
+                if d > three_months_ago:
                     released = d.strftime("%Y-%m-%d")
 
                     line = "<tr><td>%-30s</td> <td>%-12s</td> <td>%s</td></tr>" %(
