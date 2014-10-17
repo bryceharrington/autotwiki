@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+
+<head>
+<title>Linux Graphics News | Linux Journal</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="Graphics, Industry News" />
+
+<link rel="shortcut icon" href="http://www.linuxjournal.com/files/linuxjournal.com/ufiles/linuxjournal_favicon.png" type="image/x-icon" />
+<link type="text/css" rel="stylesheet" media="all" href="http://www.linuxjournal.com/files/linuxjournal.com/ufiles/css/css_a1310b2823ccde604ed68b0e66ca3e33.css" />
+<link type="text/css" rel="stylesheet" media="print" href="http://www.linuxjournal.com/files/linuxjournal.com/ufiles/css/css_fdf85486e7f023472a6d6f67fa08f249.css" />
+</head>
+<body>
+
+
+<div id="page">
+
+<h1>Linux Graphics News</h1>
+
+<p>${date}  By Bryce Harrington</p>
+
+<p>[Link to last quarter's report and discussion of previous status]
+</p>
+
+<h2>X.org</h2>
+
+${xorg_content}
+
+
+<h2>Cairo</h2>
+
+${cairo_content}
+
+<h2>Wayland</h2>
+
+${wayland_content}
+
+<h2>EFL</h2>
+
+${efl_content}
+
+
+<h2>Upcoming Events</h2>
+<ul>
+<li> <b>[Event]</b> - [Date]: [Place]</li>
+%for e in events:
+  <li> <b>${e.name}</b> - ${e.date}: ${e.location}</li>
+</ul>
+
+<h2>Final Thoughts</h2>
+<p>
+[Final Thoughts]
+</p>
+
+
+<hr>
+<p>
+Bryce Harrington is a Senior Open Source Developer at Samsung Research
+America focusing on Open Source Graphics. Prior to Samsung, he lead
+Canonical, Ltd.'s Ubuntu X.org team, and focused on stabilization of the
+graphics and input infrastructures for the Ubuntu distribution. Bryce
+began his career in the aerospace industry as a spacecraft propulsions
+engineer at The Aerospace Corporation, Hughes Space and Communications
+and TRW. Later, he joined the Open Source Development Labs as a Senior
+Performance Engineer working on NFSv4 testing and development of
+automated test systems. He is a founder and developer of the Inkscape
+project and serves as Chairman of the Inkscape Board. Bryce has a BS-AE
+from USC and an MS-AE from Caltech. </p>
+
+</div>
+</body>
+</html>
