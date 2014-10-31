@@ -138,8 +138,10 @@ class TwikiBrowser(object):
         self.domain = config['domain']
         self.username = config['username']
         self.team = config['team']
-        password = config['password']
-        self.br.add_password(self.domain, self.username, password)
+        self.password = config['password']
+
+        # Basic auth
+        self.br.add_password(self.domain, self.username, self.password)
 
     def set_debug(self, value):
         assert type(value) is bool
@@ -152,16 +154,32 @@ class TwikiBrowser(object):
         return "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
             self.domain, self.team, self.username, week.number, week.year)
 
-    def get_page(self, url):
+    def login(self):
+        self.br.form['username'] = self.username
+        self.br.form['password'] = self.password
+        self.br.submit()
+
+    def get_page(self, url, relogin_if_needed=True):
         self.br.open(url)
         self._url_loaded = url
 
         # Select the first (index zero) form
         self.br.select_form(nr=0)
-        return self.br.form['text']
+        try:
+            return self.br.form['text']
+        except:
+            if relogin_if_needed:
+                # Try logging in (adv. auth this time)
+                self.login()
+                print self.br.response().read()
+                return self.get_page(url, relogin_if_needed=False)
+            else:
+                print "Error editing twiki at ", url
+                print dir(self.br.form)
+                raise
 
     def set_page(self, url, text):
-        if url != self._url_loaded:
+        if url != self._url_loaded or self.br.form is None:
             self.get_page(url)
         self.br.form['text'] = text
         self.br.submit()
