@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+usage = '''
+%prog [options]
+'''
+
+import os
+import sys
+import glob
+import json
+import urllib
+from datetime import datetime
+
+from mako.template import Template
+from mako.lookup import TemplateLookup
+
+if __name__ == "__main__":
+    today = datetime.strftime(datetime.now(), "%Y-%m-%d")
+
+    # TODO: Use proper tmp directory
+    mako_lookup = TemplateLookup(directories=["templates"],
+                                 module_directory='/tmp/mako_modules')
+    try:
+        t = mako_lookup.get_template("sensing.html")
+    except:
+        print "Can't find sensing.html template in Templates"
+        sys.exit(1)
+
+    print t.render(today=today,
+                   project="X.org",
+                   events=[],
+                   )
+
+
