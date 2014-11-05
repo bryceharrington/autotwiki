@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Builds project using Coverity and uploads results
+
+########################################################################
+# Configuration
+DESC="Pre-release"
+EMAIL="bryce@osg.samsung.com"
+PATH=${PATH}:${HOME}/ubuntu/Coverity/cov-analysis-linux64-7.5.0/bin/
+########################################################################
+
+if [ -n "$1" ]; then
+    PROJECT="$1"
+else
+    PROJECT=$(basename $(pwd))
+fi
+
+VERSION=$(egrep "\bVERSION\b" config.h | cut -d' ' -f3)
+RELEASE_VERSION=$(echo ${VERSION//\"/} | cut -d+ -f1)
+
+# TODO: Consider fresh clone each time?
+# TODO: Else, reuse autotwiki's checkouts?
+
+if [ -d ".bzr" ]; then
+    bzr pull
+else
+    git pull
+fi
+if [ $? -ne 0 ]; then
+    echo "Error: Could not update repository"
+    exit 2
+fi
+
+./configure && make clean
+rm -f ./${PROJECT}.tgz ./cov-int/
+
+echo "building ${PROJECT}-coverity"
+cov-build --dir cov-int make -j 2
+if [ $? -ne 0 ]; then
+    echo "Error: Could not build ${PROJECT} for coverity"
+    exit 3
+fi
+
+
+echo "tarring up results for ${PROJECT}"
+tar czvf ${PROJECT}.tgz cov-int
+if [ $? -ne 0 ]; then
+    echo "Error: Could not tar results"
+    exit 4
+fi
+
+DEST_URL="https://scan.coverity.com/builds?project=${PROJECT}"
+echo "uploading ./${PROJECT}.tgz to ${DEST_URL}"
+curl --form token=test \
+  --form email=${EMAIL} \
+  --form file=@${PROJECT}.tgz \
+  --form version="${RELEASE_VERSION}" \
+  --form description="${DESC}" \
+  ${DEST_URL}
+if [ $? -ne 0 ]; then
+    echo "Error: Could not upload results"
+    exit 5
+fi
+
+echo "done"
