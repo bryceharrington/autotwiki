@@ -1,7 +1,29 @@
 #!/bin/bash
 
+set -e
+
+# Use cases:
+#   a) Patch proposed on Cairo mailing list.  I want to register that it needs
+#      review, then that I'm reviewing it, take review notes, respond to the 
+#      patch author, run tests, merge it, etc.
+#   b) I'm working on something.  I want to create a branch, apply one or
+#      more changes to it, generate and submit the patches upstream, record
+#      for weekly reports that I submitted them, track when they land, and
+#      cleanup the directory afterwards.
+#   c) Create a new checkout of a git repo, copy in my hook, create a branch,
+#      generate a do_build, do_test, do_clean
+#
+# Separate scripts for each thing?  Hook each thing into my existing
+# workflow as much as possible.
+#
+# This will be used for wayland, cairo, and (maybe) inkscape
+#
+# Purpose is to be able to build lists of patches that are in process,
+# and to report on the state of everything at the end of the week
+
 # Simple tool to log incoming patches
 
+source_root=/home/bryce/src
 logdir=/home/bryce/.local/share/autotwiki
 logfile=${logdir}/patch.log
 
@@ -9,7 +31,45 @@ if [ ! -d ${logdir} ]; then
     mkdir -p ${logdir}
 fi
 
-for patch in ${*}; do
+patchset=${*}
+
+# TODO: Determine the project.  For now assume Cairo
+project=Cairo
+branch_name_master=cairo
+project_root=${source_root}/${project}
+
+# Update master tree
+# TODO: Make sure we're on the master branch and there's no changes.
+#       See the other autotwiki script.
+cd ${project_root}/${branch_name_master} && \
+    git pull
+
+
+# TODO: Determine branch name from the bug report, or as an arg
+branch_name=tbd
+
+if [ ! -z "${branch_name}" ]; then
+    mkdir -p ${project_root}/branch.${branch_name}/
+    cd ${project_root}/branch.${branch_name}/
+    branch_new=${project_root}/branch.${branch_name}/${branch_name_master}
+
+    # Need to register the name of the main development focus
+    git clone --local ${project_root}/${branch_name_master} ${branch_name_master}
+
+    # TODO: Maybe copy it from a more stable location?
+    cp ~/tmp/prepare-commit-msg ${branch_name_master}/.git/hooks/
+fi
+
+# Create a TODO or PLAN file
+# TODO: Load from a template
+echo "todo" > TODO
+
+# Register the patch
+echo "" > ${logfile}
+for patch in ${patchset}; do
     echo ${patch} >> ${logfile}
 done
 
+# Create a buildit script
+
+# Create a testit script
