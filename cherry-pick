@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# This script works around how git cherry-pick often leaves
+# the tree in a funky state when it can't merge.
+
+commit=$1
+
+git show ${commit} | patch -p1 --dry-run 
+
+if [ $? -ne 0 ]; then
+    echo "Commit won't apply cleanly here"
+    exit 1
+fi
+
+git cherry-pick ${commit}
