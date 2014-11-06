@@ -1,0 +1,19 @@
+#!/bin/bash
+
+patches=$(ls -t ~/incoming-patches/*PATCH_*.mbox &>/dev/null)
+
+if [ -z "${patches}" ]; then
+    exit 0
+fi
+
+i=0
+for mbox_file in ${patches}; do
+    patch=$(basename ${mbox_file%.mbox})
+    #project=${patch%_PATCH_*}
+    name=${patch#*PATCH_}
+    desc=${name//_/ }
+    #printf "%3d %-10s %s\n" $i "$project" "$desc"
+    printf "%3d %-10s %s\n" $i "$desc"
+
+    i=$(( i + 1 ))
+done

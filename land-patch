@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# TODO: Parameterize patch directory
+# TODO: Allow specifying index # as argument
+patch=$(ls -t ~/incoming-patches/*PATCH_*.mbox &>/dev/null| head -n 1)
+
+if [ -z "${patch}" ]; then
+    exit 0
+fi
+
+# TODO: Test apply the patch?
+
+# TODO: Create a branch for the patch?
+
+echo $patch
+ret=$(git am $patch)
+# TODO: Handle error; rollback branch to known good state
+
+# TODO: Register the time landed
+if [ $ret -eq 0 ]; then
+    mv $patch ~/incoming-patches/Landed/
+else
+    git am --abort
+fi
+
