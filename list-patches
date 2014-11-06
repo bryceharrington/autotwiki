@@ -1,6 +1,6 @@
 #!/bin/bash
 
-patches=$(ls -t ~/incoming-patches/*PATCH_*.mbox &>/dev/null)
+patches=$(ls -t ~/incoming-patches/*PATCH_*.mbox 2>/dev/null)
 
 if [ -z "${patches}" ]; then
     exit 0

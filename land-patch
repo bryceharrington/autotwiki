@@ -1,8 +1,13 @@
 #!/bin/bash
 
+N=$1
+if [ -z "$N" ]; then
+    N=0
+fi
+N=$(( N + 1 ))
+
 # TODO: Parameterize patch directory
-# TODO: Allow specifying index # as argument
-patch=$(ls -t ~/incoming-patches/*PATCH_*.mbox &>/dev/null| head -n 1)
+patch=$(ls -t ~/incoming-patches/*PATCH_*.mbox 2>/dev/null| head -n ${N} | tail -n 1)
 
 if [ -z "${patch}" ]; then
     exit 0
@@ -10,14 +15,12 @@ fi
 
 # TODO: Test apply the patch?
 
-# TODO: Create a branch for the patch?
-
 echo $patch
-ret=$(git am $patch)
+git am $patch
 # TODO: Handle error; rollback branch to known good state
 
 # TODO: Register the time landed
-if [ $ret -eq 0 ]; then
+if [ $? -eq 0 ]; then
     mv $patch ~/incoming-patches/Landed/
 else
     git am --abort
