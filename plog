@@ -73,3 +73,30 @@ done
 # Create a buildit script
 
 # Create a testit script
+
+# Objects
+# -------
+# module
+#
+# repository
+#  * module
+#  * owned by:  'project' or 'person'
+#  * owning project
+#  * owning person
+# 
+# project
+#  * list of components
+#
+# person
+#  * name
+#
+# patch_state
+#  * 
+#
+# patch
+#  * name
+#  * patch_state status
+#  * person author
+#
+# patchset
+#  * list of patches
