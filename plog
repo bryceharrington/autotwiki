@@ -74,9 +74,42 @@ done
 
 # Create a testit script
 
+# API
+# ---
+#  * get-patchset
+#  * add-patchset
+#  * list-patches
+
+#  * add-comment(patch, text)
+
+#  * set-patchset-status(patchset, state)
+#  * set-patch-status(patch, state)
+
 # Objects
 # -------
+# state_set
+#  * id
+#  * name
+#  * definition
+#
+# state
+#  * name
+#  * state_set
+#  * action_required
+#  * definition
+#
 # module
+#  * scm_url
+#  * webscm_url
+#
+# module_state_set
+#  * project id
+#  * state_set id
+#
+# module state
+#  * module id
+#  * state_set_id
+#  * state
 #
 # repository
 #  * module
@@ -85,18 +118,100 @@ done
 #  * owning person
 # 
 # project
-#  * list of components
+#  * linkname
+#  * name
+#  * list_id
+#  * list_email
+#  * web_url
+#  * list of modules
+#
+# project_state_set
+#  * project id
+#  * state_set id
+#
+# project state
+#  * project id
+#  * state_set_id
+#  * state
+#
+# user_profile
+#  * user
+#  * primary_project
+#  * send_email
+#  * Various settings
+#
+# user_state_set
+#  * project id
+#  * state_set id
+#
+# user state
+#  * user id
+#  * state_set_id
+#  * state
 #
 # person
 #  * name
+#  * email
+#  * user
 #
-# patch_state
-#  * 
+# comment
+#  * id
+#  * patch
+#  * msgid
+#  * person commenter
+#  * date
+#  * headers
+#  * content
+#
+# comment_state_set
+#  * project id
+#  * state_set id
+#
+# comment state
+#  * comment id
+#  * state_set_id
+#  * state
 #
 # patch
+#  * msgid
+#  * sequence number
 #  * name
-#  * patch_state status
-#  * person author
+#  * date
+#  * person submitter
+#  * headers
+#  * content
+#  * pull_url
+#  * commit_ref
+#
+# patch_state_set
+#  * project id
+#  * state_set id
+#
+# patch state
+#  * patch id
+#  * state_set_id
+#  * state
 #
 # patchset
-#  * list of patches
+#  * id
+#  * module id
+#  * version number
+#  * source (bug tracker, mailing list, local git tree, etc.)
+#  * superseded by patchset id
+#
+# patchset patches
+#  * patchset id
+#  * patch id
+#
+# patchset_state_set
+#  * project id
+#  * state_set id
+#
+# patchset state
+#  * patchset id
+#  * state_set_id
+#  * state
+#
+# TODO:
+#  Testing results
+#  state type setting user permissions
