@@ -22,7 +22,7 @@ import sys
 import json
 import string
 import mechanize
-from optparse import OptionParser
+from argparse import ArgumentParser
 from subprocess import (Popen, PIPE)
 from datetime import (date, datetime, timedelta)
 
@@ -97,26 +97,26 @@ class Week(object):
 class Autotwiki(object):
     def __init__(self):
         # Parse options
-        parser = OptionParser(usage="%prog [OPTIONS] <repository>")
-        parser.add_option('--config', action='store', type='str', dest='config',
-                          help="Use specified config file location",
-                          default='~/.config/autotwiki/config.json')
-        parser.add_option('--debug', action='store_true', dest='debug',
-                          help="Enable detailed debugging output",
-                          default=False)
-        parser.add_option('--dry-run', action='store_true', dest='dryrun',
-                          help="Don't update the remote website",
-                          default=False)
-        parser.add_option('--new', action='store_true', dest='new',
-                          help="Overwrite status page with new content generated from template",
-                          default=False)
-        parser.add_option('-v', '--version', action='store_true', dest='version_and_exit',
-                          help="Print version number and exit",
-                          default=False)
-        parser.add_option('-w', '--week', action='store', type='int', dest='week_number',
-                          help="Generate report for the given week number rather than current",
-                          default=None)
-        (self.options, self.args) = parser.parse_args()
+        parser = ArgumentParser()
+        parser.add_argument('--config', action='store', type=str, dest='config',
+                            help='Use specified config file location',
+                            default='~/.config/autotwiki/config.json')
+        parser.add_argument('--debug', action='store_true', dest='debug',
+                            help="Enable detailed debugging output",
+                            default=False)
+        parser.add_argument('--dry-run', action='store_true', dest='dryrun',
+                            help="Do not update the remote website",
+                            default=False)
+        parser.add_argument('--new', action='store_true', dest='new',
+                            help="Overwrite status page with new content generated from template",
+                            default=False)
+        parser.add_argument('-v', '--version', action='store_true', dest='version_and_exit',
+                            help="Print version number and exit",
+                            default=False)
+        parser.add_argument('-w', '--week', action='store', type=int, dest='week_number',
+                            help="Generate report for the given week number rather than current",
+                            default=None)
+        self.options = parser.parse_args()
 
         # Configuration
         config_filename = os.path.expanduser(self.options.config)
