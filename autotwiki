@@ -116,6 +116,9 @@ class Autotwiki(object):
         parser.add_argument('-w', '--week', action='store', type=int, dest='week_number',
                             help="Generate report for the given week number rather than current",
                             default=None)
+        parser.add_argument('-y', '--year', action='store', type=int, dest='year_number',
+                            help="Generate report for the given year rather than current",
+                            default=None)
         self.options = parser.parse_args()
 
         # Configuration
@@ -235,7 +238,7 @@ if __name__ == "__main__":
         print("autotwiki version 0.1")
         sys.exit(0)
 
-    week = Week(app.options.week_number)
+    week = Week(app.options.week_number, app.options.year_number)
     week_0 = Week(0)
 
     local = True
