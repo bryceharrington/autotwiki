@@ -21,78 +21,13 @@ import re
 import sys
 import json
 import string
-import mechanize
 from argparse import ArgumentParser
 from subprocess import (Popen, PIPE)
-from datetime import (date, datetime, timedelta)
 
-class Week(object):
-    STARTS_ON_SUNDAY = False
-
-    def __init__(self, week_number=None, year=None):
-        d = datetime.now()
-        if week_number is not None:
-            if year is None:
-                year = d.year
-            assert type(week_number) is int
-            assert type(year) is int
-
-            # Calculate the first day in the given week
-            fmt = '%Y-%U-%w' if Week.STARTS_ON_SUNDAY else '%Y-%W-%w'
-            d = datetime.strptime('%04d-%02d-1' %(year, week_number), fmt)
-            if date(year, 1, 4).isoweekday() > 4:
-                d -= timedelta(days=7)
-
-        self.date_in_week = datetime.date(d)
-
-    @property
-    def begin(self):
-        """Returns a date object for the first day of the week"""
-        weekday = self.date_in_week.isoweekday() % 7
-        begin = self.date_in_week - timedelta(days=weekday)
-        assert begin.isoweekday() == 7 # Sunday
-        return begin
-
-    @property
-    def end(self):
-        """Returns date object for the last day of the week"""
-        end = self.begin + timedelta(days=6)
-        assert end.isoweekday() == 6
-        return end
-
-    @property
-    def number(self):
-        """Returns the week number of the date"""
-        return self.date_in_week.isocalendar()[1]
-
-    @property
-    def year(self):
-        """Returns the year from the end of the week"""
-        return self.end.year
-
-    def description(self):
-        """Return a description of the calendar week (Sunday to Saturday)
-        containing the date d, avoiding repetition.
-
-        >>> from datetime import date
-        >>> Week(date(2013, 12, 30)).description()
-        'Dec 29, 2013 - Jan 4, 2014'
-        >>> Week(date(2014, 1, 25)).description()
-        'Jan 19 - 25, 2014'
-        >>> Week(date(2014, 1, 26)).description()
-        'Jan 26 - Feb 1, 2014'
-        """
-        assert self.begin <= self.date_in_week <= self.end
-
-        if self.begin.year != self.end.year:
-            fmt = '{0:%b} {0.day}, {0.year} - {1:%b} {1.day}, {1.year}'
-        elif self.begin.month != self.end.month:
-            fmt = "{0:%b} {0.day} - {1:%b} {1.day}, {1.year}"
-        else:
-            fmt = "{0:%b} {0.day} - {1.day}, {1.year}"
-
-        return fmt.format(self.begin, self.end)
-
+sys.path.insert(0, os.path.realpath(
+        os.path.join(os.path.dirname(__file__), "..")))
+from autotwiki.week import Week
+from autotwiki.twiki_browser import TwikiBrowser
 
 class Autotwiki(object):
     def __init__(self):
@@ -131,62 +66,6 @@ class Autotwiki(object):
         if self.options.dryrun:
             return True
         return self.config.get('dry-run', False)
-
-class TwikiBrowser(object):
-    def __init__(self, config):
-        self.br = mechanize.Browser()
-        self._url_loaded = None
-
-        # Credentials
-        self.domain = config['domain']
-        self.username = config['username']
-        self.team = config['team']
-        self.password = config['password']
-
-        # Basic auth
-        self.br.add_password(self.domain, self.username, self.password)
-
-    def set_debug(self, value):
-        assert type(value) is bool
-        self.br.set_debug_http(value)
-        self.br.set_debug_redirects(value)
-        self.br.set_debug_responses(value)
-
-    def url_weekly_status(self, week):
-        """Given a Week object, returns a url for the twiki status page"""
-        return "%s/bin/edit/%s/%sWeek%02dStatus%d" %(
-            self.domain, self.team, self.username, week.number, week.year)
-
-    def login(self):
-        self.br.form['username'] = self.username
-        self.br.form['password'] = self.password
-        self.br.submit()
-
-    def get_page(self, url, relogin_if_needed=True):
-        self.br.open(url)
-        self._url_loaded = url
-
-        # Select the first (index zero) form
-        self.br.select_form(nr=0)
-        try:
-            return self.br.form['text']
-        except:
-            if relogin_if_needed:
-                # Try logging in (adv. auth this time)
-                self.login()
-                print self.br.response().read()
-                return self.get_page(url, relogin_if_needed=False)
-            else:
-                print "Error editing twiki at ", url
-                print dir(self.br.form)
-                raise
-
-    def set_page(self, url, text):
-        if url != self._url_loaded or self.br.form is None:
-            self.get_page(url)
-        self.br.form['text'] = text
-        self.br.submit()
-        return self.br.response().read()
 
 def load_file(fname):
     filename = os.path.expanduser(fname)
