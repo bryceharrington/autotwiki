@@ -1,5 +1,3 @@
-* In a given week, if a project had no changes, omit it from the table
-
 * improve docs for getting started
 
 * Update a patch table in an existing status report in twiki
@@ -16,5 +14,3 @@
 * Tally counts of patches from @.*samsung.com in general, as well as
   specifically by OSG team members.  Track Samsung and OSG's rankings
   for patch contributions on a yearly and all-time basis.
-
-
