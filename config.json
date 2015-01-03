@@ -9,30 +9,10 @@
     "row-template": "~/.config/autotwiki/row-template.html",
 
     "projects": [
-	{ "name": "autotwiki",
-	  "repositories": [
-	      { "location": "/var/cache/autotwiki/repositories/autotwiki" }
-	  ]
-	},
 	{ "name": "cairo",
 	  "repositories": [
 	      { "location": "/var/cache/autotwiki/repositories/cairo" },
 	      { "location": "/var/cache/autotwiki/repositories/cairo-www" }
-	  ]
-	},
-	{ "name": "cairogles",
-	  "repositories": [
-	      { "location": "/var/cache/autotwiki/repositories/cairogles" }
-	  ]
-	},
-	{ "name": "caskbench",
-	  "repositories": [
-	      { "location": "/var/cache/autotwiki/repositories/caskbench" }
-	  ]
-	},
-	{ "name": "skia",
-	  "repositories": [
-	      { "location": "/var/cache/autotwiki/repositories/skia" }
 	  ]
 	},
 	{ "name": "wayland",
