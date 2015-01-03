@@ -21,6 +21,19 @@
 	      { "location": "/var/cache/autotwiki/repositories/wayland-web" },
 	      { "location": "/var/cache/autotwiki/repositories/weston" }
 	  ]
+	},
+	{ "name": "servo",
+	  "submissions": {
+	      "hook": "github-pull-requests",
+	      "author": "brunoabinader",
+	      "owner": "mozilla/servo"
+	  },
+	  "repositories": [
+	      { "location": "/var/cache/autotwiki/repositories/servo" }
+	  ]
 	}
+    ]
+}
+
     ]
 }
