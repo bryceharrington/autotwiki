@@ -28,24 +28,28 @@ fi
 
 quarter=$(echo "$(date +%m)/4 + 1" | bc)
 quarter_year=$(date +%Y)
+last_year=$(echo "$quarter_year - 1" | bc)
 quarter_month=$(( 1 + 4 * ($quarter - 1) ))
 quarter_day=1
 quarter_start=$(printf "%4d-%02d-%02d" $quarter_year $quarter_month $quarter_day)
-year_start=$(printf "%4d-01-01" $quarter_year)
+this_year_start=$(printf "%4d-01-01" $quarter_year)
+last_year_start=$(printf "%4d-01-01" $last_year)
 week_start=$(date -dlast-sunday +%Y-%m-%d)
 
 
-printf "%-30s  %10s %10s %10s %10s\n" "Repository" "This Week" "This Quarter" "This Year" "All Time"
+printf "%-15s  %10s %10s %10s %10s %10s\n" "Repository" "This Week" "This Quarter" "This Year" "Last Year" "All Time"
 for repository in /var/cache/autotwiki/repositories/*; do
     ${HOOKS}/update_repository $repository
     this_week=$(run_hook ${HOOKS}/commits_per_author $repository $week_start End $author)
     this_quarter=$(run_hook ${HOOKS}/commits_per_author $repository $quarter_start End $author)
-    this_year=$(run_hook ${HOOKS}/commits_per_author $repository $year_start End $author)
+    this_year=$(run_hook ${HOOKS}/commits_per_author $repository $this_year_start End $author)
+    last_year=$(run_hook ${HOOKS}/commits_per_author $repository $last_year_start $this_year_start $author)
     all_time=$(run_hook ${HOOKS}/commits_per_author $repository Beginning End $author)
 
     total_this_week=$(run_hook ${HOOKS}/commits_per_author $repository $week_start End '.')
     total_this_quarter=$(run_hook ${HOOKS}/commits_per_author $repository $quarter_start End '.')
-    total_this_year=$(run_hook ${HOOKS}/commits_per_author $repository $year_start End '.')
+    total_this_year=$(run_hook ${HOOKS}/commits_per_author $repository $this_year_start End '.')
+    total_last_year=$(run_hook ${HOOKS}/commits_per_author $repository $last_year_start $this_year_start '.')
     total_all_time=$(run_hook ${HOOKS}/commits_per_author $repository Beginning End '.')
     
     if [ $total_this_week -gt 0 ]; then
@@ -63,15 +67,22 @@ for repository in /var/cache/autotwiki/repositories/*; do
     else
 	this_year_pct=0
     fi
+    if [ $total_last_year -gt 0 ]; then
+	last_year_pct=$(( (100 * last_year) / total_last_year ))
+    else
+	last_year_pct=0
+    fi
     if [ $total_all_time -gt 0 ]; then
 	all_time_pct=$(( (100 * all_time) / total_all_time ))
     else
 	all_time_pct=0
     fi
 
-    printf "%-30s %5d  %3d%% %5d  %3d%% %5d  %3d%% %5d  %3d%%\n"  $(basename $repository) \
+    printf "%-15s %5d  %3d%% %5d  %3d%% %5d  %3d%% %5d  %3d%% %5d  %3d%%\n"  \
+	$(basename $repository) \
 	$this_week $this_week_pct \
 	$this_quarter $this_quarter_pct \
 	$this_year $this_year_pct \
+	$last_year $this_year_pct \
 	$all_time $all_time_pct
 done
