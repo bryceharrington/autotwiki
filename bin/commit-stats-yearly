@@ -29,19 +29,24 @@ fi
 this_year=$(date +%Y)
 
 # Header
-printf "%-15s  "
+printf "%-20s"
 for i in 0 -1 -2 -3 -4; do
     num_all_repositories[i+5]=0
     total_all_repositories[i+5]=0
 
     year=$(echo "$this_year + $i" | bc)
-    printf "%10s" "==$year=="
+    printf "%12s" "==$year=="
 done
 printf "\n"
 
 for repository in /var/cache/autotwiki/repositories/*; do
+    program_name=$(echo "$repository" | sed 's/-[0-9]\+\(\.[0-9]\+\)*$//')
+    if [ "$program_name" != "$repository" ]; then
+	# $repository is a branch... skipping
+	continue
+    fi
     ${HOOKS}/update_repository $repository
-    printf "%-15s " $(basename $repository)
+    printf "%-20s " $(basename $repository)
     for i in 0 -1 -2 -3 -4; do
 	that_year=$(echo "$this_year + $i" | bc)
 	next_year=$(echo "$this_year + $i + 1" | bc)
@@ -59,13 +64,13 @@ for repository in /var/cache/autotwiki/repositories/*; do
 	else
 	    that_year_pct=0
 	fi
-	printf "%5d  %3d%%" $num_that_year $that_year_pct
+	printf " %5d %3d%% " $num_that_year $that_year_pct
     done
     printf "\n"
 done
 
 printf "==================================================================================\n"
-printf "%-15s " "Total"
+printf "%-20s " "Total"
 for i in 0 -1 -2 -3 -4; do
 	that_year=$(echo "$this_year + $i" | bc)
 	next_year=$(echo "$this_year + $i + 1" | bc)
@@ -77,6 +82,6 @@ for i in 0 -1 -2 -3 -4; do
 	else
 	    that_year_pct=0
 	fi
-	printf "%5d  %3d%%" ${num_all_repositories[i+5]} $that_year_pct
+	printf " %5d %3d%% " ${num_all_repositories[i+5]} $that_year_pct
 done
 printf "\n"
