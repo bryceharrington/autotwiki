@@ -28,6 +28,11 @@ fi
 
 this_year=$(date +%Y)
 
+for i in 0 -1 -2 -3 -4; do
+    total_all_repositories[i+5]=0
+    num_all_repositories[i+5]=0
+done
+
 # Header
 printf "%-15s  "
 for i in 0 -1 -2 -3 -4; do
@@ -47,7 +52,10 @@ for repository in /var/cache/autotwiki/repositories/*; do
 
 	num_that_year=$(run_hook ${HOOKS}/commits_per_author $repository $that_year_start $next_year_start $author)
 	total_that_year=$(run_hook ${HOOKS}/commits_per_author $repository $that_year_start $next_year_start '.')
-    
+
+        num_all_repositories[i+5]=$(( num_all_repositories[i+5] + num_that_year ))
+        total_all_repositories[i+5]=$(( total_all_repositories[i+5] + total_that_year ))
+
 	if [ $total_that_year -gt 0 ]; then
 	    that_year_pct=$(( (100 * num_that_year) / total_that_year ))
 	else
@@ -57,3 +65,20 @@ for repository in /var/cache/autotwiki/repositories/*; do
     done
     printf "\n"
 done
+
+printf "==================================================================================\n"
+printf "%-25s " "Total"
+for i in 0 -1 -2 -3 -4; do
+	that_year=$(echo "$this_year + $i" | bc)
+	next_year=$(echo "$this_year + $i + 1" | bc)
+	that_year_start=$(printf "%4d-01-01" $that_year)
+	next_year_start=$(printf "%4d-01-01" $next_year)
+
+	if [ ${total_all_repositories[i+5]} -gt 0 ]; then
+	    that_year_pct=$(( (100 * num_all_repositories[i+5]) / total_all_repositories[i+5] ))
+	else
+	    that_year_pct=0
+	fi
+	printf "%5d  %3d%%" ${num_all_repositories[i+5]} $that_year_pct
+done
+printf "\n"
