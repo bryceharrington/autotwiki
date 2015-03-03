@@ -65,14 +65,6 @@ class Week(object):
     def description(self):
         """Return a description of the calendar week (Sunday to Saturday)
         containing the date d, avoiding repetition.
-
-        >>> from datetime import date
-        >>> Week(date(2013, 12, 30)).description()
-        'Dec 29, 2013 - Jan 4, 2014'
-        >>> Week(date(2014, 1, 25)).description()
-        'Jan 19 - 25, 2014'
-        >>> Week(date(2014, 1, 26)).description()
-        'Jan 26 - Feb 1, 2014'
         """
         assert self.begin <= self.date_in_week <= self.end
 
@@ -86,7 +78,17 @@ class Week(object):
         return fmt.format(self.begin, self.end)
 
 if __name__ == "__main__":
-    week = Week(52, 2014)
+    week = Week(2, 2015)
+
+    """
+        >>> from datetime import date
+        >>> Week(date(2013, 12, 30)).description()
+        'Dec 29, 2013 - Jan 4, 2014'
+        >>> Week(date(2014, 1, 25)).description()
+        'Jan 19 - 25, 2014'
+        >>> Week(date(2014, 1, 26)).description()
+        'Jan 26 - Feb 1, 2014'
+    """
 
     print "Description:    ", week.description()
     print "Week beginning: ", week.begin
