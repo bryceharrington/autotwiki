@@ -28,14 +28,12 @@ fi
 
 this_year=$(date +%Y)
 
-for i in 0 -1 -2 -3 -4; do
-    total_all_repositories[i+5]=0
-    num_all_repositories[i+5]=0
-done
-
 # Header
 printf "%-15s  "
 for i in 0 -1 -2 -3 -4; do
+    num_all_repositories[i+5]=0
+    total_all_repositories[i+5]=0
+
     year=$(echo "$this_year + $i" | bc)
     printf "%10s" "==$year=="
 done
@@ -67,7 +65,7 @@ for repository in /var/cache/autotwiki/repositories/*; do
 done
 
 printf "==================================================================================\n"
-printf "%-25s " "Total"
+printf "%-15s " "Total"
 for i in 0 -1 -2 -3 -4; do
 	that_year=$(echo "$this_year + $i" | bc)
 	next_year=$(echo "$this_year + $i + 1" | bc)
