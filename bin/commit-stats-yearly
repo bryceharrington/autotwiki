@@ -1,6 +1,11 @@
 #!/bin/bash
 
 HOOKS=~/src/Autotwiki/autotwiki/hooks
+HOOK=commits_per_author
+if [ "$1" = "--maintainers" ]; then
+    HOOK=reviews_per_committer
+    shift
+fi
 
 run_hook() {
     hook=$1
@@ -53,8 +58,8 @@ for repository in /var/cache/autotwiki/repositories/*; do
 	that_year_start=$(printf "%4d-01-01" $that_year)
 	next_year_start=$(printf "%4d-01-01" $next_year)
 
-	num_that_year=$(run_hook ${HOOKS}/commits_per_author $repository $that_year_start $next_year_start $author)
-	total_that_year=$(run_hook ${HOOKS}/commits_per_author $repository $that_year_start $next_year_start '.')
+	num_that_year=$(run_hook ${HOOKS}/${HOOK} $repository $that_year_start $next_year_start $author)
+	total_that_year=$(run_hook ${HOOKS}/${HOOK} $repository $that_year_start $next_year_start '.')
 
         num_all_repositories[i+5]=$(( num_all_repositories[i+5] + num_that_year ))
         total_all_repositories[i+5]=$(( total_all_repositories[i+5] + total_that_year ))
