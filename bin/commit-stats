@@ -22,7 +22,7 @@ run_hook() {
 
 author=$*
 if [ -z "${author}" ]; then
-    echo "Usage: commit_stats <author-name-regex>"
+    echo "Usage: $(basename $0) <author-name-regex>"
     exit
 fi
 

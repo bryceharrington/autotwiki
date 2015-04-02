@@ -14,3 +14,8 @@
 * Tally counts of patches from @.*samsung.com in general, as well as
   specifically by OSG team members.  Track Samsung and OSG's rankings
   for patch contributions on a yearly and all-time basis.
+
+* commit-stats should provide a configurable table of email aliases and
+  hiring times for SRA/SRUK members.  The LF annual report does this
+  with a rewrite hash table.  The emails can be found in the username
+  column at http://osg.sisa.samsung.com/bin/view/OpenSourceGroup/SRA-SVOss
