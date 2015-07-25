@@ -172,6 +172,7 @@ if __name__ == "__main__":
                 sys.stderr.write("Error updating repository %s\n" %(repo['location']))
                 sys.exit(1)
 
+            # Patches
             c = measure("commits_per_author",
                         repo['location'],
                         author,
@@ -211,6 +212,26 @@ if __name__ == "__main__":
                         re.compile(submissions['owner']),
                         None, week.end)
             row_params['patches_submitted_all_time'] += c
+
+            # Reviews
+            c = measure("reviews_per_committer",
+                        repo['location'],
+                        author,
+                        week.begin, week.end)
+            row_params['patches_reviewed_this_week'] += c
+
+            c = measure("reviews_per_committer",
+                        repo['location'],
+                        author,
+                        week_0.begin, week.end)
+            row_params['patches_reviewed_this_year'] += c
+
+            c = measure("reviews_per_committer",
+                        repo['location'],
+                        author,
+                        None, week.end)
+            row_params['patches_reviewed_all_time'] += c
+
         #print("%-30s %10d %10d %10d" %(project['name'],
         #                               row_params['patches_committed_this_week'],
         #                               row_params['patches_committed_this_year'],
