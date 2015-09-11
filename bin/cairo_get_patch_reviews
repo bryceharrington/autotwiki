@@ -1,0 +1,105 @@
+#!/usr/bin/python
+
+import os
+import re
+import sys
+import urlparse
+import mechanize
+
+from datetime import datetime
+from argparse import ArgumentParser
+from BeautifulSoup import BeautifulSoup
+
+base_url="http://lists.cairographics.org/archives/cairo"
+reviewed_by='Reviewed-by: Bryce Harrington'
+
+def get_monthly_archives(br, base_url, num_months=1):
+    monthly_archives = []
+
+    r = br.open(base_url)
+    html = r.read()
+    soup = BeautifulSoup(html)
+
+    # TODO: Determine the appropriate month to load.  For now, just pick
+    # the first month listed.
+
+    for n in range(0, num_months):
+        row = soup.findAll('tr')[n+1]
+        month, year = row.findAll('td')[0].text.replace(':', '').split(' ')
+        links = row.findAll('td')[1]
+        for link in links.findAll('a'):
+            if link.text == "[ Date ]":
+                monthly_archives.append((month, year, "%s/%s" %(base_url, link['href'])))
+                break
+
+        if len(monthly_archives) == num_months:
+            return monthly_archives
+
+    return []
+
+
+if __name__ == '__main__':
+    ### Handle program arguments
+    parser = ArgumentParser(description='Get release announcement URLs from mailman archives')
+    args=parser.parse_args()
+
+    br = mechanize.Browser()
+    br.set_handle_redirect(True)
+    br.set_handle_referer(True)
+    br.set_handle_robots(False)
+    br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+    br.addheaders = [
+        ('User-agent', ('Mozilla/5.0 (X11; U; Linux i686; en-US;'
+        ' rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox'
+        '/3.0.1'))
+        ]
+
+    for month, year, month_archive_url in get_monthly_archives(br, base_url, 3):
+        print
+        print "%s-%s" %(month, year)
+        if month_archive_url is None:
+            print "Error: Couldn't find month archive url"
+            sys.exit(1)
+
+        month_url = "%s/%s-%s" %(base_url, year, month)
+
+        r = br.open(month_archive_url)
+        html = r.read()
+        soup = BeautifulSoup(html)
+        for item in soup.findAll('li'):
+            # Parse the subject
+            links = item.findAll('a')
+            if len(links) < 1:
+                continue
+            subject = links[0].text
+
+            if "[PATCH]" not in subject:
+                continue
+            post_url = "%s/%s" %(month_url, links[0]['href'])
+            # Load the email content itself
+            r = br.open(post_url)
+            post_html = r.read()
+            if reviewed_by in post_html:
+                post_soup = BeautifulSoup(post_html)
+                post_date_str = post_soup.findAll("i")[0].text
+                post_date = datetime.strptime(post_date_str, "%a %b %d %H:%M:%S %Z %Y")
+
+                print "  %s" %(subject)
+                print "  %s" %(post_url)
+                print "  %s" %(reviewed_by)
+                print "  %s" %(post_date)
+                print
+            #package = subject.split(' ')[1]
+            #version = subject.split(' ')[2]
+
+            ## Parse the author
+            #name = item.findAll('i')
+            #if len(name) < 1:
+            #    continue
+            #author = name[0].text
+
+            #url_parts = month_archive_url.split('/')
+            #url_parts.pop()
+            #url_parts.append(links[0]['href'])
+            #print "%s %s %s" %(package, version, '/'.join(url_parts))
+
