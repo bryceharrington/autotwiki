@@ -94,6 +94,7 @@ def measure(hook, target, regex, begin_date=None, end_date=None):
     else:
         end = end_date.strftime('%m-%d-%Y')
     cmd = ["hooks/%s" %(hook), target, begin, end]
+    print cmd
     p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE)
     errors = p.stderr.readlines()
     if len(errors)>0:
@@ -191,6 +192,25 @@ if __name__ == "__main__":
                         None, week.end)
             row_params['patches_committed_all_time'] += c
 
+            # Reviews
+            c = measure("reviews_per_committer",
+                        repo['location'],
+                        author,
+                        week.begin, week.end)
+            row_params['patches_reviewed_this_week'] += c
+
+            c = measure("reviews_per_committer",
+                        repo['location'],
+                        author,
+                        week_0.begin, week.end)
+            row_params['patches_reviewed_this_year'] += c
+
+            c = measure("reviews_per_committer",
+                        repo['location'],
+                        author,
+                        None, week.end)
+            row_params['patches_reviewed_all_time'] += c
+
             submissions = project.get('submissions', None)
             if submissions is None:
                 continue
@@ -213,29 +233,10 @@ if __name__ == "__main__":
                         None, week.end)
             row_params['patches_submitted_all_time'] += c
 
-            # Reviews
-            c = measure("reviews_per_committer",
-                        repo['location'],
-                        author,
-                        week.begin, week.end)
-            row_params['patches_reviewed_this_week'] += c
-
-            c = measure("reviews_per_committer",
-                        repo['location'],
-                        author,
-                        week_0.begin, week.end)
-            row_params['patches_reviewed_this_year'] += c
-
-            c = measure("reviews_per_committer",
-                        repo['location'],
-                        author,
-                        None, week.end)
-            row_params['patches_reviewed_all_time'] += c
-
-        #print("%-30s %10d %10d %10d" %(project['name'],
-        #                               row_params['patches_committed_this_week'],
-        #                               row_params['patches_committed_this_year'],
-        #                               row_params['patches_committed_all_time']))
+        print("%-30s %10d %10d %10d" %(project['name'],
+                                       row_params['patches_reviewed_this_week'],
+                                       row_params['patches_reviewed_this_year'],
+                                       row_params['patches_reviewed_all_time']))
 
         # TODO: Pass the collected data to one or more formatters
         # TODO: Add the output of the formatters to params
@@ -266,4 +267,4 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if not local:
-        print twiki.set_page(url, text)
+        twiki.set_page(url, text)
