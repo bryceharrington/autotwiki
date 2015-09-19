@@ -10,6 +10,10 @@ from datetime import datetime
 from argparse import ArgumentParser
 from BeautifulSoup import BeautifulSoup
 
+sys.path.insert(0, os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "..")))
+from autotwiki.week import Week
+
 base_url="http://lists.cairographics.org/archives/cairo"
 reviewed_by='Reviewed-by: Bryce Harrington'
 
@@ -83,11 +87,13 @@ if __name__ == '__main__':
                 post_soup = BeautifulSoup(post_html)
                 post_date_str = post_soup.findAll("i")[0].text
                 post_date = datetime.strptime(post_date_str, "%a %b %d %H:%M:%S %Z %Y")
+                post_week_number = Week(date=post_date).number
 
                 print "  %s" %(subject)
                 print "  %s" %(post_url)
                 print "  %s" %(reviewed_by)
                 print "  %s" %(post_date)
+                print "  Week #%d" %(post_week_number)
                 print
             #package = subject.split(' ')[1]
             #version = subject.split(' ')[2]
