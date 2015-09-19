@@ -16,13 +16,18 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import (date, datetime, timedelta)
+import datetime
 
 class Week(object):
     STARTS_ON_SUNDAY = False
 
-    def __init__(self, week_number=None, year=None):
-        d = datetime.now()
+    def __init__(self, week_number=None, year=None, date=None):
+        d = datetime.datetime.now()
+
+        if date is not None:
+            year = date.isocalendar()[1]
+            week_number = date.isocalendar()[1]
+
         if week_number is not None:
             if year is None:
                 year = d.year
@@ -31,24 +36,24 @@ class Week(object):
 
             # Calculate the first day in the given week
             fmt = '%Y-%U-%w' if Week.STARTS_ON_SUNDAY else '%Y-%W-%w'
-            d = datetime.strptime('%04d-%02d-1' %(year, week_number), fmt)
-            if date(year, 1, 4).isoweekday() > 4:
-                d -= timedelta(days=7)
+            d = datetime.datetime.strptime('%04d-%02d-1' %(year, week_number), fmt)
+            if datetime.date(year, 1, 4).isoweekday() > 4:
+                d -= datetime.timedelta(days=7)
 
-        self.date_in_week = datetime.date(d)
+        self.date_in_week = datetime.datetime.date(d)
 
     @property
     def begin(self):
         """Returns a date object for the first day of the week"""
         weekday = self.date_in_week.isoweekday() % 7
-        begin = self.date_in_week - timedelta(days=weekday)
+        begin = self.date_in_week - datetime.timedelta(days=weekday)
         assert begin.isoweekday() == 7 # Sunday
         return begin
 
     @property
     def end(self):
         """Returns date object for the last day of the week"""
-        end = self.begin + timedelta(days=6)
+        end = self.begin + datetime.timedelta(days=6)
         assert end.isoweekday() == 6
         return end
 
