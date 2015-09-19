@@ -20,7 +20,6 @@ import mechanize
 
 #sys.path.insert(0, os.path.realpath(
 #        os.path.join(os.path.dirname(__file__), "..")))
-#from autotwiki.week import Week
 
 class TwikiBrowser(object):
     def __init__(self, config):
@@ -64,7 +63,7 @@ class TwikiBrowser(object):
             if relogin_if_needed:
                 # Try logging in (adv. auth this time)
                 self.login()
-                print self.br.response().read()
+                self.br.response().read()
                 return self.get_page(url, relogin_if_needed=False)
             else:
                 print "Error editing twiki at ", url
