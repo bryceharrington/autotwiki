@@ -17,13 +17,13 @@ from autotwiki.week import Week
 projects = {
     'cairo': {
         'base_url': "http://lists.cairographics.org/archives/cairo",
+        'author_name': "Bryce Harrington",
     },
     'wayland': {
         'base_url': "http://lists.freedesktop.org/archives/wayland-devel",
+        'author_name': "Bryce Harrington",
     },
 }
-
-my_name = "Bryce Harrington"
 
 def get_monthly_archives(br, base_url, num_months=1):
     monthly_archives = []
@@ -55,6 +55,7 @@ if __name__ == '__main__':
     parser.add_argument(dest='project', type=str, choices=projects.keys())
     args = parser.parse_args()
     base_url = projects[args.project]['base_url']
+    my_name = projects[args.project]['author_name']
 
     br = mechanize.Browser()
     br.set_handle_redirect(True)

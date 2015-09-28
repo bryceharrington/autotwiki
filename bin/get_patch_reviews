@@ -17,13 +17,13 @@ from autotwiki.week import Week
 projects = {
     'cairo': {
         'base_url': "http://lists.cairographics.org/archives/cairo",
+        'reviewer_name': 'Bryce Harrington',
     },
     'wayland': {
         'base_url': "http://lists.freedesktop.org/archives/wayland-devel",
+        'reviewer_name': 'Bryce Harrington',
     },
 }
-
-reviewed_by='Reviewed-by: Bryce Harrington'
 
 def get_monthly_archives(br, base_url, num_months=1):
     monthly_archives = []
@@ -52,9 +52,10 @@ def get_monthly_archives(br, base_url, num_months=1):
 if __name__ == '__main__':
     ### Handle program arguments
     parser = ArgumentParser(description='Get release announcement URLs from mailman archives')
-    parser.add_argument(dest='project', type=str, choices=["cairo", "wayland"])
+    parser.add_argument(dest='project', type=str, choices=projects.keys())
     args = parser.parse_args()
     base_url = projects[args.project]['base_url']
+    reviewed_by = projects[args.project]['reviewer_name']
 
     br = mechanize.Browser()
     br.set_handle_redirect(True)
@@ -104,17 +105,3 @@ if __name__ == '__main__':
                 print "  %s" %(post_date)
                 print "  Week #%d" %(post_week_number)
                 print
-            #package = subject.split(' ')[1]
-            #version = subject.split(' ')[2]
-
-            ## Parse the author
-            #name = item.findAll('i')
-            #if len(name) < 1:
-            #    continue
-            #author = name[0].text
-
-            #url_parts = month_archive_url.split('/')
-            #url_parts.pop()
-            #url_parts.append(links[0]['href'])
-            #print "%s %s %s" %(package, version, '/'.join(url_parts))
-
