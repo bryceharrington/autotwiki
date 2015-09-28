@@ -127,14 +127,15 @@ if __name__ == "__main__":
     if not app.dryrun:
         local = False
 
+    stat_start_label = "<!-- start-statistics-table -->"
+    stat_end_label = "<!-- end-statistics-table -->"
     page_params = {
         'username':                app.config['username'],
         'full_name':               app.config['username'],
         'week_number':             str(week.number),
         'week_string':             week.description(),
-        'patch_table_rows':        ''
+        'patch_table_rows':        stat_start_label + "\n",
         }
-
     row_template = load_file(app.config['row-template'])
 
     # Collect statistics
@@ -243,6 +244,9 @@ if __name__ == "__main__":
         patch_table_row = string.Template(row_template).substitute(row_params)
         page_params['patch_table_rows'] += patch_table_row
 
+    # Close off the patch_table_rows section
+    page_params['patch_table_rows'] += "\n" + stat_end_label
+
     # Prepare to interact with the remote twiki site
     text = ''
     if not local:
@@ -258,12 +262,26 @@ if __name__ == "__main__":
     if len(text) < 100:
         # Topic looks like it hasn't been created yet
         text = load_file(app.config['status-template'])
+    elif "start-statistics-table" in text:
+        # TODO: Substitue the current table with "$patch_table_rows"
+        print("TODO: Replace existing table")
+        print
+        print text
+        print
+        regex = "%s(.*)%s" %(stat_start_label, stat_end_label)
+        text = re.sub(regex, '$patch_table_rows', text)
+        print "After Substitution:"
+        print
+        print text
+
+        sys.exit(1)
 
     text = string.Template(text).substitute(page_params)
 
     if app.dryrun:
         print page_params['patch_table_rows']
-        #print text
+        print
+        print text
         sys.exit(0)
 
     if not local:
