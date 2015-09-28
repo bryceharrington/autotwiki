@@ -14,7 +14,15 @@ sys.path.insert(0, os.path.realpath(
             os.path.join(os.path.dirname(__file__), "..")))
 from autotwiki.week import Week
 
-base_url="http://lists.cairographics.org/archives/cairo"
+projects = {
+    'cairo': {
+        'base_url': "http://lists.cairographics.org/archives/cairo",
+    },
+    'wayland': {
+        'base_url': "http://lists.freedesktop.org/archives/wayland-devel",
+    },
+}
+
 reviewed_by='Reviewed-by: Bryce Harrington'
 
 def get_monthly_archives(br, base_url, num_months=1):
@@ -41,11 +49,12 @@ def get_monthly_archives(br, base_url, num_months=1):
 
     return []
 
-
 if __name__ == '__main__':
     ### Handle program arguments
     parser = ArgumentParser(description='Get release announcement URLs from mailman archives')
-    args=parser.parse_args()
+    parser.add_argument(dest='project', type=str, choices=["cairo", "wayland"])
+    args = parser.parse_args()
+    base_url = projects[args.project]['base_url']
 
     br = mechanize.Browser()
     br.set_handle_redirect(True)
