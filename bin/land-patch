@@ -13,16 +13,13 @@ if [ -z "${patch}" ]; then
     exit 0
 fi
 
-# TODO: Test apply the patch?
-
 echo $patch
-git am $patch
-# TODO: Handle error; rollback branch to known good state
+git am --reject $patch
 
 # TODO: Register the time landed
 if [ $? -eq 0 ]; then
     mv $patch ~/incoming-patches/Landed/
-else
-    git am --abort
+#else
+#    git am --abort
 fi
 
