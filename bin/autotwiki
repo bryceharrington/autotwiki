@@ -222,16 +222,18 @@ if __name__ == "__main__":
                         week.begin, week.end)
             row_params['patches_submitted_this_week'] += c
 
-            c = measure(submissions['hook'],
-                        submissions['author'],
-                        re.compile(submissions['owner']),
-                        week_0.begin, week.end)
+            c = 0 # TODO
+#            c = measure(submissions['hook'],
+#                        submissions['author'],
+#                        re.compile(submissions['owner']),
+#                        week_0.begin, week.end)
             row_params['patches_submitted_this_year'] += c
 
-            c = measure(submissions['hook'],
-                        submissions['author'],
-                        re.compile(submissions['owner']),
-                        None, week.end)
+            c = 0 # TODO
+#            c = measure(submissions['hook'],
+#                        submissions['author'],
+#                        re.compile(submissions['owner']),
+#                        None, week.end)
             row_params['patches_submitted_all_time'] += c
 
         print("%-30s %10d %10d %10d" %(project['name'],
