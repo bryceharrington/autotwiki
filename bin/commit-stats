@@ -37,7 +37,7 @@ last_year_start=$(printf "%4d-01-01" $last_year)
 week_start=$(date -dlast-sunday +%Y-%m-%d)
 
 
-printf "%-15s  %10s %10s %10s %10s %10s\n" "Repository" "This Week" "This Quarter" "This Year" "Last Year" "All Time"
+printf "%-20s  %10s %10s %10s %10s %10s\n" "Repository" "This Week" "This Quarter" "This Year" "Last Year" "All Time"
 for repository in /var/cache/autotwiki/repositories/*; do
     ${HOOKS}/update_repository $repository
     this_week=$(run_hook ${HOOKS}/commits_per_author $repository $week_start End $author)
@@ -78,7 +78,7 @@ for repository in /var/cache/autotwiki/repositories/*; do
 	all_time_pct=0
     fi
 
-    printf "%-15s %5d  %3d%% %5d  %3d%% %5d  %3d%% %5d  %3d%% %5d  %3d%%\n"  \
+    printf "%-20s %5d  %3d%% %5d  %3d%% %5d  %3d%% %5d  %3d%% %5d  %3d%%\n"  \
 	$(basename $repository) \
 	$this_week $this_week_pct \
 	$this_quarter $this_quarter_pct \
