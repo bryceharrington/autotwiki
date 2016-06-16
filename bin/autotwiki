@@ -142,6 +142,7 @@ if __name__ == "__main__":
     author = re.compile(app.config['name'])
     #print("%-30s %10s %10s %10s" %("Repository", "This Week", "This Year", "All Time"))
     for project in app.config['projects']:
+        print "Project: ", project
         row_params = {
             'project_name': project['name'],
 
@@ -170,6 +171,7 @@ if __name__ == "__main__":
             'patches_for_gbm_request_all_time': 0,
             }
         for repo in project['repositories']:
+            print "  Repo: ", repo
             if not update_repository(repo['location']):
                 sys.stderr.write("Error updating repository %s\n" %(repo['location']))
                 sys.exit(1)
@@ -216,25 +218,26 @@ if __name__ == "__main__":
             if submissions is None:
                 continue
 
-            c = measure(submissions['hook'],
-                        submissions['author'],
-                        re.compile(submissions['owner']),
-                        week.begin, week.end)
-            row_params['patches_submitted_this_week'] += c
+        c = measure(submissions['hook'],
+                    submissions['author'],
+                    re.compile(submissions['owner']),
+                    week.begin, week.end)
+        print "Measured submissions this week as ", c
+        row_params['patches_submitted_this_week'] += c
 
-            c = 0 # TODO
-#            c = measure(submissions['hook'],
-#                        submissions['author'],
-#                        re.compile(submissions['owner']),
-#                        week_0.begin, week.end)
-            row_params['patches_submitted_this_year'] += c
+        c = 0 # TODO
+#        c = measure(submissions['hook'],
+#                    submissions['author'],
+#                    re.compile(submissions['owner']),
+#                    week_0.begin, week.end)
+        row_params['patches_submitted_this_year'] += c
 
-            c = 0 # TODO
-#            c = measure(submissions['hook'],
-#                        submissions['author'],
-#                        re.compile(submissions['owner']),
-#                        None, week.end)
-            row_params['patches_submitted_all_time'] += c
+        c = 0 # TODO
+#        c = measure(submissions['hook'],
+#                    submissions['author'],
+#                    re.compile(submissions['owner']),
+#                    None, week.end)
+        row_params['patches_submitted_all_time'] += c
 
         print("%-30s %10d %10d %10d" %(project['name'],
                                        row_params['patches_reviewed_this_week'],
@@ -250,6 +253,7 @@ if __name__ == "__main__":
     page_params['patch_table_rows'] += "\n" + stat_end_label
 
     # Prepare to interact with the remote twiki site
+    print "Preparing to send to twiki"
     text = ''
     if not local:
         twiki = TwikiBrowser(app.config)
@@ -263,6 +267,7 @@ if __name__ == "__main__":
     # If current status page is empty, load from the template
     if len(text) < 100:
         # Topic looks like it hasn't been created yet
+        print "Creating new page"
         text = load_file(app.config['status-template'])
     elif "start-statistics-table" in text:
         # TODO: Substitue the current table with "$patch_table_rows"
