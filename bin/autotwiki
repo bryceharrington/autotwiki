@@ -214,9 +214,9 @@ if __name__ == "__main__":
                         None, week.end)
             row_params['patches_reviewed_all_time'] += c
 
-            submissions = project.get('submissions', None)
-            if submissions is None:
-                continue
+        submissions = project.get('submissions', None)
+        if submissions is None:
+            continue
 
         c = measure(submissions['hook'],
                     submissions['author'],
