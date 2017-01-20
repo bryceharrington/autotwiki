@@ -42,8 +42,8 @@ class Autotwiki(object):
         parser.add_argument('--dry-run', action='store_true', dest='dryrun',
                             help="Do not update the remote website",
                             default=False)
-        parser.add_argument('--new', action='store_true', dest='new',
-                            help="Overwrite status page with new content generated from template",
+        parser.add_argument('--preserve', action='store_true', dest='preserve',
+                            help="Don't overwrite status page with new content generated from template",
                             default=False)
         parser.add_argument('-v', '--version', action='store_true', dest='version_and_exit',
                             help="Print version number and exit",
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     week_0 = Week(0)
 
     local = True
-    if not app.options.new:
+    if app.options.preserve:
         local = False
     if not app.dryrun:
         local = False
@@ -215,29 +215,27 @@ if __name__ == "__main__":
             row_params['patches_reviewed_all_time'] += c
 
         submissions = project.get('submissions', None)
-        if submissions is None:
-            continue
+        if submissions is not None:
+            c = measure(submissions['hook'],
+                        submissions['author'],
+                        re.compile(submissions['owner']),
+                        week.begin, week.end)
+            print "Measured submissions this week as ", c
+            row_params['patches_submitted_this_week'] += c
 
-        c = measure(submissions['hook'],
-                    submissions['author'],
-                    re.compile(submissions['owner']),
-                    week.begin, week.end)
-        print "Measured submissions this week as ", c
-        row_params['patches_submitted_this_week'] += c
+            c = 0 # TODO
+#            c = measure(submissions['hook'],
+#                        submissions['author'],
+#                        re.compile(submissions['owner']),
+#                        week_0.begin, week.end)
+            row_params['patches_submitted_this_year'] += c
 
-        c = 0 # TODO
-#        c = measure(submissions['hook'],
-#                    submissions['author'],
-#                    re.compile(submissions['owner']),
-#                    week_0.begin, week.end)
-        row_params['patches_submitted_this_year'] += c
-
-        c = 0 # TODO
-#        c = measure(submissions['hook'],
-#                    submissions['author'],
-#                    re.compile(submissions['owner']),
-#                    None, week.end)
-        row_params['patches_submitted_all_time'] += c
+            c = 0 # TODO
+#            c = measure(submissions['hook'],
+#                        submissions['author'],
+#                        re.compile(submissions['owner']),
+#                        None, week.end)
+            row_params['patches_submitted_all_time'] += c
 
         print("%-30s %10d %10d %10d" %(project['name'],
                                        row_params['patches_reviewed_this_week'],
@@ -261,7 +259,7 @@ if __name__ == "__main__":
 
         # Retrieve the current status page text
         url = twiki.url_weekly_status(week)
-        if not app.options.new:
+        if app.options.preserve:
             text = twiki.get_page(url)
 
     # If current status page is empty, load from the template
