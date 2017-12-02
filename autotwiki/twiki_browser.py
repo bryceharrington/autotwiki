@@ -32,6 +32,9 @@ class TwikiBrowser(object):
         self.team = config['team']
         self.password = config['password']
 
+        # Ignore robots.txt
+        self.br.set_handle_robots(False)
+
         # Basic auth
         self.br.add_password(self.domain, self.username, self.password)
 
